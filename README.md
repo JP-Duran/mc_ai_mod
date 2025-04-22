@@ -7,6 +7,7 @@
 - Fabric 0.16.13
 - Fabric API installed in minecraft
 - IntelliJ IDEA Community Edition (this is what I used, at least)
+  - [instructions for settings up IntelliJ for minecraft mod development](https://docs.fabricmc.net/develop/getting-started/setting-up-a-development-environment)
 
 Import the project into IntelliJ, let Gradle sync, and download any dependencies that you need. You should then be able to click the 'Minecraft Client' Run button in the top right to get the mod working.  
 
