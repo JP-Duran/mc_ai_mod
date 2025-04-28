@@ -19,11 +19,18 @@ import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.inventory.SimpleInventory; // For inventory
+import net.minecraft.inventory.Inventory;
 
 public class DwarfEntity extends MerchantEntity {
 
     public final AnimationState idleAnimationState = new AnimationState();
     private int idleAnimationTimeout = 0;
+    private final SimpleInventory inventory = new SimpleInventory(27); // 27 is the size of a chest
+
+    public SimpleInventory getInventory() {
+        return this.inventory;
+    }
 
     @Nullable
     private TradeOfferList offers;
@@ -44,7 +51,8 @@ public class DwarfEntity extends MerchantEntity {
 
     @Override
     protected void initGoals() {
-        this.goalSelector.add(0, new WanderAroundFarGoal(this, 1.0D));
+        //this.goalSelector.add(0, new WanderAroundFarGoal(this, 1.0D)); // UNCOMMENT TO ADD BACK WANDERING
+        this.goalSelector.add(1, new FindDiamond(this));
     }
 
     private void setupAnimationStates() {
@@ -75,5 +83,15 @@ public class DwarfEntity extends MerchantEntity {
     @Override
     public @Nullable PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
         return ModEntities.DWARF.create(world, SpawnReason.BREEDING);
+    }
+
+    // Called when the player right clicks the dwarf
+    // It calls the screen handler factory to open the dwarf's inventory
+    @Override
+    public ActionResult interactMob(PlayerEntity player, Hand hand){
+        if(!this.getWorld().isClient()){
+            player.openHandledScreen(new DwarfScreenHandlerFactory(this));
+        }
+        return ActionResult.SUCCESS;
     }
 }
