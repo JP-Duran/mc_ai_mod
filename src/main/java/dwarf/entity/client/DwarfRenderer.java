@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 public class DwarfRenderer extends MobEntityRenderer<DwarfEntity, DwarfRenderState, DwarfModel> {
 
     public DwarfRenderer(EntityRendererFactory.Context context) {
-        super(context, new DwarfModel(context.getPart(DwarfModel.DWARF)), 0.5f);
+        super(context, new DwarfModel(context.getPart(DwarfModel.CUBE_DWARF_LAYER)), 0.5f);
     }
 
     @Override
