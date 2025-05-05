@@ -19,11 +19,21 @@ import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.inventory.Inventory;
 
 public class DwarfEntity extends MerchantEntity {
 
     public final AnimationState idleAnimationState = new AnimationState();
+    public final AnimationState walkAnimationState = new AnimationState();
+    public final AnimationState runAnimationState = new AnimationState();
+
     private int idleAnimationTimeout = 0;
+    private final SimpleInventory inventory = new SimpleInventory(27); // 27 is the size of a chest
+
+    public SimpleInventory getInventory() {
+        return this.inventory;
+    }
 
     @Nullable
     private TradeOfferList offers;
@@ -34,26 +44,18 @@ public class DwarfEntity extends MerchantEntity {
 
     @Override
     protected void afterUsing(TradeOffer offer) {
-
+        // Empty implementation
     }
 
     @Override
     protected void fillRecipes() {
-
+        // Empty implementation
     }
 
     @Override
     protected void initGoals() {
-        this.goalSelector.add(0, new WanderAroundFarGoal(this, 1.0D));
-    }
-
-    private void setupAnimationStates() {
-        if (this.idleAnimationTimeout <= 0) {
-            this.idleAnimationTimeout = 40;
-            this.idleAnimationState.start(this.age);
-        } else {
-            --this.idleAnimationTimeout;
-        }
+        this.goalSelector.add(0, new WanderAroundFarGoal(this, 1.0D)); // UNCOMMENT TO ADD BACK WANDERING
+        this.goalSelector.add(1, new FindDiamond(this));
     }
 
     @Override
@@ -61,7 +63,37 @@ public class DwarfEntity extends MerchantEntity {
         super.tick();
 
         if (this.getWorld().isClient()) {
-            this.setupAnimationStates();
+            // Force update animation states every tick
+            updateAnimationStates();
+        }
+    }
+
+    private void updateAnimationStates() {
+        // Check if the entity is moving
+        boolean isMoving = this.getVelocity().horizontalLengthSquared() > 0.0025D;
+
+        if (isMoving) {
+            // Check speed to determine walk vs run
+            float speed = (float) this.getVelocity().horizontalLength();
+
+            if (speed > 0.15f) {
+                // Running - start run animation, stop others
+                this.walkAnimationState.stop();
+                this.idleAnimationState.stop();
+                this.runAnimationState.startIfNotRunning(this.age);
+            } else {
+                // Walking - start walk animation, stop others
+                this.runAnimationState.stop();
+                this.idleAnimationState.stop();
+                this.walkAnimationState.startIfNotRunning(this.age);
+            }
+        } else {
+            // Not moving - idle animation
+            this.runAnimationState.stop();
+            this.walkAnimationState.stop();
+
+            // IMPORTANT CHANGE: Always start idle animation when not moving
+            this.idleAnimationState.startIfNotRunning(this.age);
         }
     }
 
@@ -75,5 +107,14 @@ public class DwarfEntity extends MerchantEntity {
     @Override
     public @Nullable PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
         return ModEntities.DWARF.create(world, SpawnReason.BREEDING);
+    }
+
+    // Called when the player right clicks the dwarf
+    @Override
+    public ActionResult interactMob(PlayerEntity player, Hand hand) {
+        if (!this.getWorld().isClient()) {
+            player.openHandledScreen(new DwarfScreenHandlerFactory(this));
+        }
+        return ActionResult.SUCCESS;
     }
 }
