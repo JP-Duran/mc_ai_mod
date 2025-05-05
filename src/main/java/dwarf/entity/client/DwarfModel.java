@@ -1,14 +1,17 @@
 package dwarf.entity.client;
 
+import dwarf.entity.custom.DwarfEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.entity.animation.AnimationHelper;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 @Environment(EnvType.CLIENT)
 public class DwarfModel extends EntityModel<EntityRenderState> {
@@ -17,11 +20,29 @@ public class DwarfModel extends EntityModel<EntityRenderState> {
 
     private final ModelPart body;
     private final ModelPart hat;
+    private final ModelPart head;
+    private final ModelPart rightArm;
+    private final ModelPart leftArm;
+    private final ModelPart rightLeg;
+    private final ModelPart leftLeg;
+    private final ModelPart beard;
+    private final ModelPart nose;
 
     public DwarfModel(ModelPart root) {
         super(root);
         this.body = root.getChild("Body");
         this.hat = root.getChild("Hat");
+        this.head = this.body.getChild("Head");
+        this.nose = this.head.getChild("Nose");
+        this.beard = this.head.getChild("beard");
+
+        ModelPart arms = this.body.getChild("Arms");
+        this.rightArm = arms.getChild("rightArm");
+        this.leftArm = arms.getChild("LeftArm");
+
+        ModelPart legs = this.body.getChild("Legs");
+        this.rightLeg = legs.getChild("rightLeg");
+        this.leftLeg = legs.getChild("leftLeg");
     }
 
     public static TexturedModelData getTexturedModelData() {
@@ -81,8 +102,46 @@ public class DwarfModel extends EntityModel<EntityRenderState> {
     }
 
 
-    public void setAngles(EntityRenderState state, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
-        // No animation yet
+    public void animate(dwarf.entity.client.DwarfRenderState state, float animationProgress, float headYaw, float headPitch) {
+        body.resetTransform();
+        head.resetTransform();
+        rightArm.resetTransform();
+        leftArm.resetTransform();
+        rightLeg.resetTransform();
+        leftLeg.resetTransform();
+        beard.resetTransform();
+        nose.resetTransform();
+
+        float swingSpeed = 1.0f;
+        float swingAmount = 0.5f;
+
+        if (state.run.isRunning()) {
+            swingSpeed = 2.5f;
+            swingAmount = 1.0f;
+        } else if (state.walk.isRunning()) {
+            swingSpeed = 1.5f;
+            swingAmount = 0.7f;
+        } else if (state.idle.isRunning()) {
+            swingSpeed = 0.5f;
+            swingAmount = 0.15f;
+        }
+
+        float swing = animationProgress * swingSpeed;
+
+        rightArm.pitch = MathHelper.cos(swing) * swingAmount;
+        leftArm.pitch = MathHelper.cos(swing + (float) Math.PI) * swingAmount;
+        rightLeg.pitch = MathHelper.cos(swing + (float) Math.PI) * swingAmount;
+        leftLeg.pitch = MathHelper.cos(swing) * swingAmount;
+
+        head.pitch = headPitch * 0.017453292F;
+        head.yaw = headYaw * 0.017453292F;
+    }
+
+
+    public void setAngles(EntityRenderState entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
+        if (entity instanceof DwarfRenderState dwarfState) {
+            animate(dwarfState, animationProgress, headYaw, headPitch);
+        }
     }
 
 

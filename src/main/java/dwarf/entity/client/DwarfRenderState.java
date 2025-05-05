@@ -9,11 +9,13 @@ import net.minecraft.item.ItemStack;
 @Environment(EnvType.CLIENT)
 
 public class DwarfRenderState extends LivingEntityRenderState {
-    public final AnimationState idlingAnimationState;
-    public final AnimationState walkingAnimationState;
+    public final AnimationState idle;
+    public final AnimationState walk;
+    public final AnimationState run;
 
     public DwarfRenderState() {
-        this.idlingAnimationState = new AnimationState();
-        this.walkingAnimationState = new AnimationState();
+        this.idle = new AnimationState();
+        this.walk = new AnimationState();
+        this.run = new AnimationState();
     }
 }
