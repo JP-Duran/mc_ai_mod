@@ -12,7 +12,8 @@ import net.minecraft.util.Identifier;
 public class DwarfRenderer extends MobEntityRenderer<DwarfEntity, DwarfRenderState, DwarfModel> {
 
     public DwarfRenderer(EntityRendererFactory.Context context) {
-        super(context, new DwarfModel(context.getPart(DwarfModel.CUBE_DWARF_LAYER)), 0.5f);
+        super(context, new DwarfModel(context.getPart(DwarfModel.DWARF_LAYER)), 0.5f);
+
     }
 
     @Override
@@ -22,6 +23,6 @@ public class DwarfRenderer extends MobEntityRenderer<DwarfEntity, DwarfRenderSta
 
     @Override
     public Identifier getTexture(DwarfRenderState state) {
-        return Identifier.of(DwarfMod.MOD_ID, "textures/entity/dwarf/mantis.png");
+        return Identifier.of(DwarfMod.MOD_ID, "textures/entity/dwarf/dwarftexture.png");
     }
 }

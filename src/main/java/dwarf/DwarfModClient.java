@@ -14,6 +14,6 @@ public class DwarfModClient implements ClientModInitializer {
 
         /* Top line is for mantis, bottom is for the testing cube */
         //EntityModelLayerRegistry.registerModelLayer(DwarfModel.DWARF, DwarfModel::getTexturedModelData);
-        EntityModelLayerRegistry.registerModelLayer(DwarfModel.CUBE_DWARF_LAYER, DwarfModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(DwarfModel.DWARF_LAYER, DwarfModel::getTexturedModelData);
     }
 }
