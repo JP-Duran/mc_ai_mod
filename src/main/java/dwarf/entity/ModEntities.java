@@ -18,7 +18,7 @@ public class ModEntities {
             Registries.ENTITY_TYPE,
             DWARF_ID,
             EntityType.Builder.create(DwarfEntity::new, SpawnGroup.CREATURE)
-                    .dimensions(.9f, 1.8f) // This changes the hitbox
+                    .dimensions(.6f, .8f) // This changes the hitbox
                     .build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, DWARF_ID)));
 
     public static void registerModEntities() {
