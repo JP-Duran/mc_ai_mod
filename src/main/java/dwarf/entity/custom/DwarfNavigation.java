@@ -4,7 +4,7 @@ import net.minecraft.entity.ai.pathing.MobNavigation;
 import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import dwarf.entity.custom.DwarfEntity; // Your entity class
+import dwarf.entity.custom.DwarfEntity;
 
 public class DwarfNavigation extends MobNavigation {
     public DwarfNavigation(DwarfEntity mobEntity, World world) {
@@ -16,5 +16,4 @@ public class DwarfNavigation extends MobNavigation {
         return null;
     }
 
-        // ... Override methods here ...
 }
