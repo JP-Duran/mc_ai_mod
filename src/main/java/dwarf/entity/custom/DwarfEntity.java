@@ -5,13 +5,13 @@ import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
+import net.minecraft.entity.ai.pathing.EntityNavigation;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -20,7 +20,6 @@ import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.inventory.Inventory;
 
 public class DwarfEntity extends MerchantEntity {
 
@@ -40,6 +39,11 @@ public class DwarfEntity extends MerchantEntity {
 
     public DwarfEntity(EntityType<? extends MerchantEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    @Override
+    protected EntityNavigation createNavigation(World world) {
+        return new DwarfNavigation(this, world);
     }
 
     @Override
