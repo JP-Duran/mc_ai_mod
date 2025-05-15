@@ -11,10 +11,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
-import static dwarf.entity.custom.findOres.EnvironmentScan.DEFAULT;
-import static dwarf.entity.custom.findOres.EnvironmentScan.scanEnvironmentToArray;
-
-
 public abstract class FindOre extends Goal {
     protected final DwarfEntity dwarf;
     protected static final int scanRadius = 5;
@@ -83,8 +79,8 @@ public abstract class FindOre extends Goal {
 
         if (closestOre != null) {
             // TODO remove
-            int envScan[][][] = scanEnvironmentToArray(world, pos, scanRadius);
-            print3DArraySlices(envScan);
+            EnvironmentScan scan = new EnvironmentScan(world, pos, scanRadius);
+            print3DArraySlices(scan.blockData);
             targetOre = closestOre;
         } else {
             activeGoal = null;
@@ -198,10 +194,10 @@ public abstract class FindOre extends Goal {
                 System.out.print("  ");
                 for (int k = array3D[i][j].length - 1; k >= 0; k--) {
                     switch(array3D[i][j][k]) {
-                        case Integer.MAX_VALUE:
+                        case EnvironmentScan.GLASS:
                             System.out.printf("%-4s", "X");
                             break;
-                        case DEFAULT:
+                        case EnvironmentScan.DEFAULT:
                             System.out.printf("%-4s", "Z");
                             break;
                         default:
