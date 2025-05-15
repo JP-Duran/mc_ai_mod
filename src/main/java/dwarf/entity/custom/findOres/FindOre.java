@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
+import static dwarf.entity.custom.findOres.EnvironmentScan.DEFAULT;
 import static dwarf.entity.custom.findOres.EnvironmentScan.scanEnvironmentToArray;
 
 
@@ -196,7 +197,17 @@ public abstract class FindOre extends Goal {
             for (int j = array3D[i].length - 1; j >= 0; j--) {
                 System.out.print("  ");
                 for (int k = array3D[i][j].length - 1; k >= 0; k--) {
-                    System.out.printf("%-4d", array3D[i][j][k]);
+                    switch(array3D[i][j][k]) {
+                        case Integer.MAX_VALUE:
+                            System.out.printf("%-4s", "X");
+                            break;
+                        case DEFAULT:
+                            System.out.printf("%-4s", "Z");
+                            break;
+                        default:
+                            System.out.printf("%-4d", array3D[i][j][k]);
+                            break;
+                    }
                 }
                 System.out.println();
             }

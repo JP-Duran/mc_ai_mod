@@ -8,6 +8,23 @@ import net.minecraft.world.World;
 
 public class EnvironmentScan {
 
+    // dwarf identifier value
+    final public static int DWARF_POS = 100;
+    // block identifier values
+    final public static int DEFAULT = 5;
+    final public static int AIR = 0;
+    final public static int DIRT = 1;
+    final public static int STONE = 2;
+    final public static int COBBLESTONE = 2; // Same as STONE
+    final public static int DIAMOND = 99;
+    final public static int GOLD = 98;
+    final public static int EMERALD = 97;
+    final public static int LAPIS = 96;
+    final public static int REDSTONE = 95;
+    final public static int IRON = 94;
+    final public static int COPPER = 93;
+    final public static int COAL = 92;
+
     /*
      * returns an integer for each block type
      * this integer represents how much 'time' it takes to traverse the block
@@ -17,12 +34,22 @@ public class EnvironmentScan {
         Block block = blockState.getBlock();
 
         // block type => integer mapping
-        if (block == Blocks.AIR) return 0;
-        if (block == Blocks.DIRT) return 1;
-        if (block == Blocks.STONE) return 2;
-        if (block == Blocks.DIAMOND_ORE) return 99;
+        if (block == Blocks.AIR) return AIR;
+        if (block == Blocks.DIRT) return DIRT;
+        if (block == Blocks.STONE) return STONE;
+        if (block == Blocks.COBBLESTONE) return COBBLESTONE;
+        if (block == Blocks.DIAMOND_ORE) return DIAMOND;
+        if (block == Blocks.GOLD_ORE) return GOLD;
+        if (block == Blocks.EMERALD_ORE) return EMERALD;
+        if (block == Blocks.LAPIS_ORE) return LAPIS;
+        if (block == Blocks.REDSTONE_ORE) return REDSTONE;
+        if (block == Blocks.IRON_ORE) return IRON;
+        if (block == Blocks.COPPER_ORE) return COPPER;
+        if (block == Blocks.COAL_ORE) return COAL;
+        // for clear roof application (alg visibility setups)
+        if (block == Blocks.GLASS) return Integer.MAX_VALUE;
         // default return value (if block not specified)
-        return 5;
+        return DEFAULT;
     }
 
     /*
@@ -55,6 +82,8 @@ public class EnvironmentScan {
                 blockData[arrayX][arrayY][arrayZ] = blockId;
             }
         }
+        // fill the dwarfs position in the arr
+        blockData[centerPos.getX() - worldOriginX][centerPos.getY() - worldOriginY][centerPos.getZ() - worldOriginZ] = DWARF_POS;
         return blockData;
     }
 }
