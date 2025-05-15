@@ -11,10 +11,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
+import static dwarf.entity.custom.findOres.EnvironmentScan.scanEnvironmentToArray;
+
 
 public abstract class FindOre extends Goal {
     protected final DwarfEntity dwarf;
-    protected static final int scanRadius = 16;
+    protected static final int scanRadius = 5;
     protected BlockPos targetOre = null;
     protected static final int torchLightLevel = 5;
 
@@ -79,6 +81,9 @@ public abstract class FindOre extends Goal {
         }
 
         if (closestOre != null) {
+            // TODO remove
+            int envScan[][][] = scanEnvironmentToArray(world, pos, scanRadius);
+            print3DArraySlices(envScan);
             targetOre = closestOre;
         } else {
             activeGoal = null;
@@ -183,4 +188,19 @@ public abstract class FindOre extends Goal {
     // Abstract methods that child classes must implement
     protected abstract boolean isTargetOre(Block block);
     protected abstract String getOreName();
+
+
+    public static void print3DArraySlices(int[][][] array3D) {
+        for (int i = 0; i < array3D.length; i++) {
+            System.out.println("Slice " + i + ":");
+            for (int j = array3D[i].length - 1; j >= 0; j--) {
+                System.out.print("  ");
+                for (int k = array3D[i][j].length - 1; k >= 0; k--) {
+                    System.out.printf("%-4d", array3D[i][j][k]);
+                }
+                System.out.println();
+            }
+            System.out.println();
+        }
+    }
 }

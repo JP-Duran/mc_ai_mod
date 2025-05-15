@@ -69,15 +69,15 @@ public class DwarfEntity extends MerchantEntity {
 
     @Override
     protected void initGoals() { //wander lowest priority so when it cant find anything it does it, then diamonds, etc
-        this.goalSelector.add(0, new WanderAroundFarGoal(this, 1.0D)); // UNCOMMENT TO ADD BACK WANDERING
+        //this.goalSelector.add(0, new WanderAroundFarGoal(this, 1.0D)); // UNCOMMENT TO ADD BACK WANDERING
         this.goalSelector.add(5, new FindDiamond(this));
-        this.goalSelector.add(4, new FindEmerald(this));
-        this.goalSelector.add(4, new FindGold(this));
-        this.goalSelector.add(3, new FindLapis(this));
-        this.goalSelector.add(2, new FindIron(this));
-        this.goalSelector.add(1, new FindCoal(this));
-        this.goalSelector.add(1, new FindCopper(this));
-        this.goalSelector.add(1, new FindRedstone(this));
+        //this.goalSelector.add(4, new FindEmerald(this));
+        //this.goalSelector.add(4, new FindGold(this));
+        //this.goalSelector.add(3, new FindLapis(this));
+        //this.goalSelector.add(2, new FindIron(this));
+        //this.goalSelector.add(1, new FindCoal(this));
+        //this.goalSelector.add(1, new FindCopper(this));
+        //this.goalSelector.add(1, new FindRedstone(this));
     }
 
 
