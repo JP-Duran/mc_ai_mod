@@ -8,10 +8,17 @@ import net.minecraft.world.World;
 
 public class EnvironmentScan {
 
+    // TODO add hash map for ore positions Hashmap of ArrayLists or something like that
+
     // general variables for env scan
     private final World world;
     private final BlockPos centerPos;
     private final int scanRadius;
+
+    // helper vars
+    private int centerIndexX;
+    private int centerIndexY;
+    private int centerIndexZ;
 
     // ore counts (within scanned environment)
     private int DIAMOND_COUNT;
@@ -82,6 +89,15 @@ public class EnvironmentScan {
 
         int[][][] blockData = new int[size][size][size];
 
+        // initialize array with OOB values
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                for (int z = 0; z < size; z++) {
+                    blockData[x][y][z] = OOB;
+                }
+            }
+        }
+
         // calculate world coords for array[0][0][0]
         int worldOriginX = centerPos.getX() - scanRadius;
         int worldOriginY = centerPos.getY() - scanRadius;
@@ -102,6 +118,7 @@ public class EnvironmentScan {
                 // increment the counter if an ore is encountered
                 switch (blockId) {
                     case DIAMOND:
+                        // hash(diamond) = coordinate
                         DIAMOND_COUNT++;
                         break;
                     case GOLD:
@@ -133,7 +150,10 @@ public class EnvironmentScan {
             }
         }
         // fill the dwarfs position in the arr
-        blockData[centerPos.getX() - worldOriginX][centerPos.getY() - worldOriginY][centerPos.getZ() - worldOriginZ] = DWARF_POS;
+        this.centerIndexX = centerPos.getX() - worldOriginX;
+        this.centerIndexY = centerPos.getY() - worldOriginY;
+        this.centerIndexZ = centerPos.getZ() - worldOriginZ;
+        blockData[centerIndexX][centerIndexY][centerIndexZ] = DWARF_POS;
         return blockData;
     }
 
@@ -154,8 +174,9 @@ public class EnvironmentScan {
     final public static int IRON = 94;
     final public static int COPPER = 93;
     final public static int COAL = 92;
-    // glass block value (high for utility purposes)
+    // utility values
     final public static int GLASS = 1000;
+    final public static int OOB = 999;
 
     // GETTERS
     public World getWorld() {
