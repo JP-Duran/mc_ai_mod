@@ -1,10 +1,15 @@
 package dwarf.entity.custom.findOres;
 
+import dwarf.entity.custom.findOres.structures.DwarfNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class EnvironmentScan {
 
@@ -26,6 +31,8 @@ public class EnvironmentScan {
     // 3d array holding environment scan
     public int[][][] blockData;
 
+    public HashMap<Integer, ArrayList<DwarfNode>> oreData;
+
     public EnvironmentScan(World world, BlockPos centerPos, int scanRadius) {
         // initialize vars
         this.world = world;
@@ -40,8 +47,11 @@ public class EnvironmentScan {
         this.COPPER_COUNT = 0;
         this.COAL_COUNT = 0;
 
+        // initialize ore map
+        this.oreData = new HashMap<>();
+
         // scan the environment
-        blockData = scanEnvironmentToArray(this.world, this.centerPos, this.scanRadius);
+        this.blockData = scanEnvironmentToArray(this.world, this.centerPos, this.scanRadius);
     }
 
     /*
@@ -57,14 +67,14 @@ public class EnvironmentScan {
         if (block == Blocks.DIRT) return DIRT;
         if (block == Blocks.STONE) return STONE;
         if (block == Blocks.COBBLESTONE) return COBBLESTONE;
-        if (block == Blocks.DIAMOND_ORE) return DIAMOND;
-        if (block == Blocks.GOLD_ORE) return GOLD;
-        if (block == Blocks.EMERALD_ORE) return EMERALD;
-        if (block == Blocks.LAPIS_ORE) return LAPIS;
-        if (block == Blocks.REDSTONE_ORE) return REDSTONE;
-        if (block == Blocks.IRON_ORE) return IRON;
-        if (block == Blocks.COPPER_ORE) return COPPER;
-        if (block == Blocks.COAL_ORE) return COAL;
+        if (block == Blocks.DIAMOND_ORE || block == Blocks.DEEPSLATE_DIAMOND_ORE) return DIAMOND;
+        if (block == Blocks.GOLD_ORE || block == Blocks.DEEPSLATE_GOLD_ORE) return GOLD;
+        if (block == Blocks.EMERALD_ORE || block == Blocks.DEEPSLATE_EMERALD_ORE) return EMERALD;
+        if (block == Blocks.LAPIS_ORE || block == Blocks.DEEPSLATE_LAPIS_ORE) return LAPIS;
+        if (block == Blocks.REDSTONE_ORE || block == Blocks.DEEPSLATE_REDSTONE_ORE) return REDSTONE;
+        if (block == Blocks.IRON_ORE || block == Blocks.DEEPSLATE_IRON_ORE) return IRON;
+        if (block == Blocks.COPPER_ORE || block == Blocks.DEEPSLATE_COPPER_ORE) return COPPER;
+        if (block == Blocks.COAL_ORE || block == Blocks.DEEPSLATE_COAL_ORE) return COAL;
         // for clear roof application (alg visibility setups)
         if (block == Blocks.GLASS) return GLASS;
         // default return value (if block not specified)
@@ -99,31 +109,40 @@ public class EnvironmentScan {
                     arrayZ >= 0 && arrayZ < size) {
 
                 int blockId = getBlockId(world, currentWorldPos);
-                // increment the counter if an ore is encountered
+                DwarfNode blockCoord = new DwarfNode(arrayX, arrayY, arrayZ);
+                // increment the counter and add position to hashmap if an ore is encountered
                 switch (blockId) {
                     case DIAMOND:
                         DIAMOND_COUNT++;
+                        oreData.computeIfAbsent(DIAMOND, k -> new ArrayList<>()).add(blockCoord);
                         break;
                     case GOLD:
                         GOLD_COUNT++;
+                        oreData.computeIfAbsent(GOLD, k -> new ArrayList<>()).add(blockCoord);
                         break;
                     case EMERALD:
                         EMERALD_COUNT++;
+                        oreData.computeIfAbsent(EMERALD, k -> new ArrayList<>()).add(blockCoord);
                         break;
                     case LAPIS:
                         LAPIS_COUNT++;
+                        oreData.computeIfAbsent(LAPIS, k -> new ArrayList<>()).add(blockCoord);
                         break;
                     case REDSTONE:
                         REDSTONE_COUNT++;
+                        oreData.computeIfAbsent(REDSTONE, k -> new ArrayList<>()).add(blockCoord);
                         break;
                     case IRON:
                         IRON_COUNT++;
+                        oreData.computeIfAbsent(IRON, k -> new ArrayList<>()).add(blockCoord);
                         break;
                     case COPPER:
                         COPPER_COUNT++;
+                        oreData.computeIfAbsent(COPPER, k -> new ArrayList<>()).add(blockCoord);
                         break;
                     case COAL:
                         COAL_COUNT++;
+                        oreData.computeIfAbsent(COAL, k -> new ArrayList<>()).add(blockCoord);
                         break;
                     default:
                         break;
@@ -200,5 +219,15 @@ public class EnvironmentScan {
 
     public int getCoalCount() {
         return COAL_COUNT;
+    }
+
+    // returns entire hashmap object
+    public HashMap<Integer, ArrayList<DwarfNode>> getOreData() {
+        return oreData;
+    }
+
+    // returns specified ore's coordinate list, or null if none
+    public List<DwarfNode> getSpecificOreData(int oreType) {
+        return oreData.getOrDefault(oreType, null);
     }
 }

@@ -80,6 +80,7 @@ public abstract class FindOre extends Goal {
         if (closestOre != null) {
             // TODO remove
             EnvironmentScan scan = new EnvironmentScan(world, pos, scanRadius);
+            System.out.print("AAAAAAAAAAAAAAAAAA" + scan.getSpecificOreData(EnvironmentScan.DIAMOND));
             print3DArraySlices(scan.blockData);
             targetOre = closestOre;
         } else {

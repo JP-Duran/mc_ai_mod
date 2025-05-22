@@ -9,5 +9,4 @@ public class DwarfPriorityQueue extends PriorityQueue {
         return Math.abs(a.X - b.X) + Math.abs(a.Y - b.Y) + Math.abs(a.Z - b.Z);
     }
 
-
 }
