@@ -13,8 +13,6 @@ import java.util.List;
 
 public class EnvironmentScan {
 
-    // TODO add hash map for ore positions Hashmap of ArrayLists or something like that
-
     // general variables for env scan
     private final World world;
     private final BlockPos centerPos;
@@ -24,6 +22,9 @@ public class EnvironmentScan {
     private int centerIndexX;
     private int centerIndexY;
     private int centerIndexZ;
+    private int worldOriginX;
+    private int worldOriginY;
+    private int worldOriginZ;
 
     // ore counts (within scanned environment)
     private int DIAMOND_COUNT;
@@ -36,7 +37,7 @@ public class EnvironmentScan {
     private int COAL_COUNT;
 
     // 3d array holding environment scan
-    public int[][][] blockData;
+    public DwarfNode[][][] blockData;
 
     public HashMap<Integer, ArrayList<DwarfNode>> oreData;
 
@@ -89,29 +90,29 @@ public class EnvironmentScan {
     }
 
     /*
-     * creates a 3d array and fills it with block => integer map values
+     * creates a 3d array and fills it with DwarfNode representing the blocks in the environment
      * this essentially creates a novel representation of the environment around the mobs position where
-     * each block is represented by an integer in a 3d array
+     * each block is represented by a DwarfNode in a 3d array
      */
-    public int[][][] scanEnvironmentToArray(World world, BlockPos centerPos, int scanRadius) {
+    public DwarfNode[][][] scanEnvironmentToArray(World world, BlockPos centerPos, int scanRadius) {
         // array width/height/depth
         int size = (2 * scanRadius) + 1;
 
-        int[][][] blockData = new int[size][size][size];
+        this.blockData = new DwarfNode[size][size][size];
 
         // initialize array with OOB values
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 for (int z = 0; z < size; z++) {
-                    blockData[x][y][z] = OOB;
+                    blockData[x][y][z] = new DwarfNode(x, y, z, OOB);
                 }
             }
         }
 
         // calculate world coords for array[0][0][0]
-        int worldOriginX = centerPos.getX() - scanRadius;
-        int worldOriginY = centerPos.getY() - scanRadius;
-        int worldOriginZ = centerPos.getZ() - scanRadius;
+        worldOriginX = centerPos.getX() - scanRadius;
+        worldOriginY = centerPos.getY() - scanRadius;
+        worldOriginZ = centerPos.getZ() - scanRadius;
 
         // fill the 3d arr
         for (BlockPos currentWorldPos : BlockPos.iterateOutwards(centerPos, scanRadius, scanRadius, scanRadius)) {
@@ -125,62 +126,93 @@ public class EnvironmentScan {
                     arrayZ >= 0 && arrayZ < size) {
 
                 int blockId = getBlockId(world, currentWorldPos);
-                DwarfNode blockCoord = new DwarfNode(arrayX, arrayY, arrayZ);
+                DwarfNode block = new DwarfNode(arrayX, arrayY, arrayZ, blockId);
                 // increment the counter and add position to hashmap if an ore is encountered
                 switch (blockId) {
                     case DIAMOND:
                         // hash(diamond) = coordinate
                         DIAMOND_COUNT++;
-                        oreData.computeIfAbsent(DIAMOND, k -> new ArrayList<>()).add(blockCoord);
+                        oreData.computeIfAbsent(DIAMOND, k -> new ArrayList<>()).add(block);
                         break;
                     case GOLD:
                         GOLD_COUNT++;
-                        oreData.computeIfAbsent(GOLD, k -> new ArrayList<>()).add(blockCoord);
+                        oreData.computeIfAbsent(GOLD, k -> new ArrayList<>()).add(block);
                         break;
                     case EMERALD:
                         EMERALD_COUNT++;
-                        oreData.computeIfAbsent(EMERALD, k -> new ArrayList<>()).add(blockCoord);
+                        oreData.computeIfAbsent(EMERALD, k -> new ArrayList<>()).add(block);
                         break;
                     case LAPIS:
                         LAPIS_COUNT++;
-                        oreData.computeIfAbsent(LAPIS, k -> new ArrayList<>()).add(blockCoord);
+                        oreData.computeIfAbsent(LAPIS, k -> new ArrayList<>()).add(block);
                         break;
                     case REDSTONE:
                         REDSTONE_COUNT++;
-                        oreData.computeIfAbsent(REDSTONE, k -> new ArrayList<>()).add(blockCoord);
+                        oreData.computeIfAbsent(REDSTONE, k -> new ArrayList<>()).add(block);
                         break;
                     case IRON:
                         IRON_COUNT++;
-                        oreData.computeIfAbsent(IRON, k -> new ArrayList<>()).add(blockCoord);
+                        oreData.computeIfAbsent(IRON, k -> new ArrayList<>()).add(block);
                         break;
                     case COPPER:
                         COPPER_COUNT++;
-                        oreData.computeIfAbsent(COPPER, k -> new ArrayList<>()).add(blockCoord);
+                        oreData.computeIfAbsent(COPPER, k -> new ArrayList<>()).add(block);
                         break;
                     case COAL:
                         COAL_COUNT++;
-                        oreData.computeIfAbsent(COAL, k -> new ArrayList<>()).add(blockCoord);
+                        oreData.computeIfAbsent(COAL, k -> new ArrayList<>()).add(block);
                         break;
                     default:
                         break;
                 }
                 // fill the block position in the array
-                blockData[arrayX][arrayY][arrayZ] = blockId;
+                blockData[arrayX][arrayY][arrayZ] = block;
             }
         }
         // fill the dwarfs position in the arr
-        this.centerIndexX = centerPos.getX() - worldOriginX;
-        this.centerIndexY = centerPos.getY() - worldOriginY;
-        this.centerIndexZ = centerPos.getZ() - worldOriginZ;
-        blockData[centerIndexX][centerIndexY][centerIndexZ] = DWARF_POS;
+        centerIndexX = centerPos.getX() - worldOriginX;
+        centerIndexY = centerPos.getY() - worldOriginY;
+        centerIndexZ = centerPos.getZ() - worldOriginZ;
+        blockData[centerIndexX][centerIndexY][centerIndexZ].type = DWARF;
+        // add dwarfs position to hashmap
+        DwarfNode dwarfPos = new DwarfNode(centerIndexX, centerIndexY, centerIndexZ, DWARF);
+        oreData.computeIfAbsent(DWARF, k -> new ArrayList<>()).add(dwarfPos);
         return blockData;
     }
 
+    /**
+     * converts local array coordinates (from a DwarfNode) to real-world BlockPos coordinates
+     */
+    public BlockPos getBlockPosFromArrayNode(DwarfNode localNode) {
+        if (localNode == null) {
+            return null;
+        }
+        int worldX = worldOriginX + localNode.X;
+        int worldY = worldOriginY + localNode.Y;
+        int worldZ = worldOriginZ + localNode.Z;
+        return new BlockPos(worldX, worldY, worldZ);
+    }
+
+    /**
+     * converts local array coordinates (integer x, y, z) to real-world BlockPos coordinates
+     */
+    public BlockPos getBlockPosFromArrayCoordinates(int arrayX, int arrayY, int arrayZ) {
+        int worldX = this.worldOriginX + arrayX;
+        int worldY = this.worldOriginY + arrayY;
+        int worldZ = this.worldOriginZ + arrayZ;
+        return new BlockPos(worldX, worldY, worldZ);
+    }
+
+    /*
+     * returns DwarfNodes representing valid neighbors of a given block index
+     */
+
     // CONSTANTS
     // dwarf identifier value
-    final public static int DWARF_POS = 100;
+    final public static int DWARF = 100;
     // block identifier values
     final public static int DEFAULT = 5;
+    // TODO SHOULD THIS BE 1? TO MAKE HEURISTIC ADMISSIBLE
     final public static int AIR = 0;
     final public static int DIRT = 1;
     final public static int STONE = 2;

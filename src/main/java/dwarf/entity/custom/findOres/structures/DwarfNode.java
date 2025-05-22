@@ -1,84 +1,45 @@
 package dwarf.entity.custom.findOres.structures;
 
 public class DwarfNode {
+    // NOTE: members are public for performance implications of direct access (less function calls)
     // coordinates (relative to 3d array index, not world coords)
     public int X;
     public int Y;
     public int Z;
+    // block type
+    public int type;
     // visited flag
-    private boolean visited;
+    public boolean visited;
     // f(n) and g(n) scores
-    private int fscore;
-    private int gscore;
+    public int fScore;
+    public int gScore;
     // parent node (for path reconstruction)
-    DwarfNode parent;
+    public DwarfNode parent;
 
     // node constructor
-    public DwarfNode(int x, int y, int z) {
+    public DwarfNode(int x, int y, int z, int type) {
         this.X = x;
         this.Y = y;
         this.Z = z;
+        this.type = type;
         this.visited = false;
-        this.fscore = Integer.MAX_VALUE;
-        this.gscore = Integer.MAX_VALUE;
+        this.fScore = Integer.MAX_VALUE;
+        this.gScore = Integer.MAX_VALUE;
         this.parent = null;
     }
 
-    // getter functions
-    public int getX() {
-        return X;
+    // returns the manhattan distance between two DwarfNodes
+    public static int manhattanDist(DwarfNode a, DwarfNode b) {
+        return Math.abs(a.X - b.X) + Math.abs(a.Y - b.Y) + Math.abs(a.Z - b.Z);
     }
 
-    public int getY() {
-        return Y;
+    // returns true if two DwarfNodes are equal (coordinates are equal)
+    public static boolean isEqual(DwarfNode a, DwarfNode b) {
+        return (a.X == b.X && a.Y == b.Y && a.Z == b.Z);
     }
 
-    public int getZ() {
-        return Z;
-    }
-
-    public boolean isVisited() {
-        return visited;
-    }
-
-    public int getFscore() {
-        return fscore;
-    }
-
-    public int getGscore() {
-        return gscore;
-    }
-
-    public DwarfNode getParent() {
-        return parent;
-    }
-
-    // setter functions
-    public void setX(int x) {
-        this.X = x;
-    }
-
-    public void setY(int y) {
-        this.Y = y;
-    }
-
-    public void setZ(int z) {
-        this.Z = z;
-    }
-
-    public void setVisited(boolean visited) {
-        this.visited = visited;
-    }
-
-    public void setFscore(int fscore) {
-        this.fscore = fscore;
-    }
-
-    public void setGscore(int gscore) {
-        this.gscore = gscore;
-    }
-
-    public void setParent(DwarfNode parent) {
-        this.parent = parent;
+    // fScore getter (for priority queue comparator)
+    public int getfScore() {
+        return fScore;
     }
 }

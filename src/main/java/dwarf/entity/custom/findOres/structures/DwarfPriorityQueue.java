@@ -1,12 +1,13 @@
 package dwarf.entity.custom.findOres.structures;
 
+import java.util.Comparator;
 import java.util.PriorityQueue;
 
-public class DwarfPriorityQueue extends PriorityQueue {
+public class DwarfPriorityQueue extends PriorityQueue<DwarfNode> {
 
-    // returns the manhattan distance between two DwarfNodes
-    public int manhattanDist(DwarfNode a, DwarfNode b) {
-        return Math.abs(a.X - b.X) + Math.abs(a.Y - b.Y) + Math.abs(a.Z - b.Z);
+    // constructor with custom comparison function (sorts by lowest f score)
+    public DwarfPriorityQueue() {
+        super(Comparator.comparingInt(DwarfNode::getfScore));
     }
 
 }

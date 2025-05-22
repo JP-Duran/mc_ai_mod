@@ -1,6 +1,7 @@
 package dwarf.entity.custom.findOres;
 
 import dwarf.entity.custom.DwarfEntity;
+import dwarf.entity.custom.findOres.structures.DwarfNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.Goal;
@@ -188,13 +189,13 @@ public abstract class FindOre extends Goal {
     protected abstract String getOreName();
 
 
-    public static void print3DArraySlices(int[][][] array3D) {
+    public static void print3DArraySlices(DwarfNode[][][] array3D) {
         for (int i = 0; i < array3D.length; i++) {
             System.out.println("Slice " + i + ":");
             for (int j = array3D[i].length - 1; j >= 0; j--) {
                 System.out.print("  ");
                 for (int k = array3D[i][j].length - 1; k >= 0; k--) {
-                    switch(array3D[i][j][k]) {
+                    switch(array3D[i][j][k].type) {
                         case EnvironmentScan.GLASS:
                             System.out.printf("%-4s", "X");
                             break;
@@ -202,7 +203,7 @@ public abstract class FindOre extends Goal {
                             System.out.printf("%-4s", "Z");
                             break;
                         default:
-                            System.out.printf("%-4d", array3D[i][j][k]);
+                            System.out.printf("%-4d", array3D[i][j][k].type);
                             break;
                     }
                 }
