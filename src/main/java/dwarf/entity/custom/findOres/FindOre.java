@@ -1,6 +1,7 @@
 package dwarf.entity.custom.findOres;
 
 import dwarf.entity.custom.DwarfEntity;
+import dwarf.entity.custom.findOres.structures.AStar;
 import dwarf.entity.custom.findOres.structures.DwarfNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -14,7 +15,7 @@ import net.minecraft.world.World;
 
 public abstract class FindOre extends Goal {
     protected final DwarfEntity dwarf;
-    protected static final int scanRadius = 5;
+    protected static final int scanRadius = 10;
     protected BlockPos targetOre = null;
     protected static final int torchLightLevel = 5;
 
@@ -80,9 +81,9 @@ public abstract class FindOre extends Goal {
 
         if (closestOre != null) {
             // TODO remove
-            EnvironmentScan scan = new EnvironmentScan(world, pos, scanRadius);
-            System.out.print("AAAAAAAAAAAAAAAAAA" + scan.getSpecificOreData(EnvironmentScan.DIAMOND));
-            print3DArraySlices(scan.blockData);
+            AStar path = new AStar(world, pos, scanRadius);
+            //EnvironmentScan scan = new EnvironmentScan(world, pos, scanRadius);
+            //print3DArraySlices(scan.blockData);
             targetOre = closestOre;
         } else {
             activeGoal = null;

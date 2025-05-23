@@ -1,43 +1,84 @@
 package dwarf.entity.custom.findOres.structures;
 
 import dwarf.entity.custom.findOres.EnvironmentScan;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
+
 public class AStar {
-    AStar(World world, BlockPos centerPos, int scanRadius) {
+    public AStar(World world, BlockPos centerPos, int scanRadius) {
         // scan the environment
         EnvironmentScan env = new EnvironmentScan(world, centerPos, scanRadius);
         // create a priority queue
         DwarfPriorityQueue queue = new DwarfPriorityQueue();
         // create a visited array
         int size = (2 * scanRadius) + 1;
-        boolean visited[][][] = new boolean[size][size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                for (int k = 0; k < size; k++) {
-                    visited[i][j][k] = false;
-                }
-            }
-        }
 
         // initialize search
         DwarfNode startNode = env.getSpecificOreData(EnvironmentScan.DWARF).get(0);
         DwarfNode goalNode = env.getSpecificOreData(EnvironmentScan.DIAMOND).get(0);
+        System.out.println("Start node = ");
+        startNode.printNode();
+        System.out.println("Goal node = ");
+        goalNode.printNode();
         // initialize startNode
         startNode.gScore = 0;
         startNode.fScore = DwarfNode.manhattanDist(startNode, goalNode);
+        // add start node to queue
+        queue.add(startNode);
 
         while (!queue.isEmpty()) {
             DwarfNode current = queue.poll();
             // if the current node is the goal node, path has been found
             if (DwarfNode.isEqual(current, goalNode)) {
-                // reconstruct path
+                System.out.println("PATH FOUND");
+                ArrayList<DwarfNode> path = new ArrayList<>();
+                current = current.parent;
+                while (current != startNode) {
+                    path.add(current);
+                    current = current.parent;
+                }
+                path.add(current);
+                while (!path.isEmpty()) {
+                    current = path.removeLast();
+                    current.printNode();
+                    BlockState pathBlockState = Blocks.RED_STAINED_GLASS.getDefaultState();
+                    world.setBlockState(env.getBlockPosFromArrayNode(current), pathBlockState, 3);
+                }
+                return;
             }
             // mark current node as visited
-            visited[current.X][current.Y][current.Z] = true;
-
+            current.visited = true;
+            /*
+            System.out.println("Current = ");
+            current.printNode();
+            System.out.println("Current neighbors = ");
+            System.out.println(current.neighbors);
+            */
+            // for all neighbors of current block
+            for (DwarfNode neighbor: current.neighbors) {
+                // if neighbor unvisited
+                if (!neighbor.visited) {
+                    int tempGScore = current.gScore + neighbor.type;
+                    // if cheaper path to neighbor, update
+                    if (tempGScore < neighbor.gScore) {
+                        // set parent
+                        neighbor.parent = current;
+                        neighbor.gScore = tempGScore;
+                        neighbor.fScore = neighbor.gScore + DwarfNode.manhattanDist(neighbor, goalNode);
+                    }
+                    // add neighbor to priority queue if not already in it
+                    if (queue.contains(neighbor)) {
+                        queue.remove(neighbor);
+                        queue.add(neighbor);
+                    } else {
+                        queue.add(neighbor);
+                    }
+                }
+            }
         }
-
     }
 }

@@ -1,5 +1,7 @@
 package dwarf.entity.custom.findOres.structures;
 
+import java.util.ArrayList;
+
 public class DwarfNode {
     // NOTE: members are public for performance implications of direct access (less function calls)
     // coordinates (relative to 3d array index, not world coords)
@@ -15,6 +17,8 @@ public class DwarfNode {
     public int gScore;
     // parent node (for path reconstruction)
     public DwarfNode parent;
+    // neighbor list
+    public ArrayList<DwarfNode> neighbors;
 
     // node constructor
     public DwarfNode(int x, int y, int z, int type) {
@@ -26,6 +30,7 @@ public class DwarfNode {
         this.fScore = Integer.MAX_VALUE;
         this.gScore = Integer.MAX_VALUE;
         this.parent = null;
+        this.neighbors = new ArrayList<>();
     }
 
     // returns the manhattan distance between two DwarfNodes
@@ -38,8 +43,14 @@ public class DwarfNode {
         return (a.X == b.X && a.Y == b.Y && a.Z == b.Z);
     }
 
+    // prints node coordinates
+    public void printNode() {
+        System.out.println("(" + this.X + ", " + this.Y + ", " + this.Z + ")");
+    }
+
     // fScore getter (for priority queue comparator)
     public int getfScore() {
         return fScore;
     }
+
 }

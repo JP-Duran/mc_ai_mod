@@ -54,15 +54,17 @@ public class EnvironmentScan {
         this.IRON_COUNT = 0;
         this.COPPER_COUNT = 0;
         this.COAL_COUNT = 0;
-
         // initialize ore map
         this.oreData = new HashMap<>();
-
         // scan the environment
-        this.blockData = scanEnvironmentToArray(this.world, this.centerPos, this.scanRadius);
+        int size = (2 * scanRadius) + 1;
+        this.blockData = new DwarfNode[size][size][size];
+        scanEnvironmentToArray(this.world, this.centerPos, this.scanRadius);
+        // calculate neighbors
+        this.calculateBlockNeighbors();
     }
 
-    /*
+    /**
      * returns an integer for each block type
      * this integer represents how much 'time' it takes to traverse the block
      */
@@ -89,7 +91,7 @@ public class EnvironmentScan {
         return DEFAULT;
     }
 
-    /*
+    /**
      * creates a 3d array and fills it with DwarfNode representing the blocks in the environment
      * this essentially creates a novel representation of the environment around the mobs position where
      * each block is represented by a DwarfNode in a 3d array
@@ -97,8 +99,6 @@ public class EnvironmentScan {
     public DwarfNode[][][] scanEnvironmentToArray(World world, BlockPos centerPos, int scanRadius) {
         // array width/height/depth
         int size = (2 * scanRadius) + 1;
-
-        this.blockData = new DwarfNode[size][size][size];
 
         // initialize array with OOB values
         for (int x = 0; x < size; x++) {
@@ -130,7 +130,6 @@ public class EnvironmentScan {
                 // increment the counter and add position to hashmap if an ore is encountered
                 switch (blockId) {
                     case DIAMOND:
-                        // hash(diamond) = coordinate
                         DIAMOND_COUNT++;
                         oreData.computeIfAbsent(DIAMOND, k -> new ArrayList<>()).add(block);
                         break;
@@ -169,15 +168,48 @@ public class EnvironmentScan {
                 blockData[arrayX][arrayY][arrayZ] = block;
             }
         }
-        // fill the dwarfs position in the arr
+        // calculate dwarfs position (always in center of arr)
         centerIndexX = centerPos.getX() - worldOriginX;
         centerIndexY = centerPos.getY() - worldOriginY;
         centerIndexZ = centerPos.getZ() - worldOriginZ;
-        blockData[centerIndexX][centerIndexY][centerIndexZ].type = DWARF;
-        // add dwarfs position to hashmap
+        // add dwarfs position to array and hashmap
         DwarfNode dwarfPos = new DwarfNode(centerIndexX, centerIndexY, centerIndexZ, DWARF);
+        blockData[centerIndexX][centerIndexY][centerIndexZ] = dwarfPos;
         oreData.computeIfAbsent(DWARF, k -> new ArrayList<>()).add(dwarfPos);
         return blockData;
+    }
+
+    /**
+     * calculates all neighbors for the DwarfNodes in blockData
+     */
+    public void calculateBlockNeighbors() {
+        // array dimensions
+        int size = (2 * scanRadius) + 1;
+        // possible directions for neighbors
+        int[][] directions = {{0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}};
+        // calculate neighbors for all blocks
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                for (int k = 0; k < size; k++) {
+                    DwarfNode current = blockData[i][j][k];
+                    for (int[] dir : directions) {
+                        int neighborX = current.X + dir[0];
+                        int neighborY = current.Y + dir[1];
+                        int neighborZ = current.Z + dir[2];
+                        // check if neighbor in bounds
+                        if (neighborX >= 0 && neighborX < size &&
+                                neighborY >= 0 && neighborY < size &&
+                                neighborZ >= 0 && neighborZ < size) {
+                            // if neighbor not glass or OOB, add to neighbor list
+                            DwarfNode neighbor = blockData[neighborX][neighborY][neighborZ];
+                            if (neighbor.type != GLASS && neighbor.type != OOB) {
+                                current.neighbors.add(neighbor);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -202,10 +234,6 @@ public class EnvironmentScan {
         int worldZ = this.worldOriginZ + arrayZ;
         return new BlockPos(worldX, worldY, worldZ);
     }
-
-    /*
-     * returns DwarfNodes representing valid neighbors of a given block index
-     */
 
     // CONSTANTS
     // dwarf identifier value
