@@ -62,7 +62,7 @@ public class AStar {
             for (DwarfNode neighbor: current.neighbors) {
                 // if neighbor unvisited
                 if (!neighbor.visited) {
-                    int tempGScore = current.gScore + neighbor.type;
+                    int tempGScore = current.gScore + neighbor.type + neighbor.extraCost;
                     // if cheaper path to neighbor, update
                     if (tempGScore < neighbor.gScore) {
                         // set parent

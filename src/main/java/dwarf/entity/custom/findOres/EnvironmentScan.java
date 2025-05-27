@@ -166,6 +166,15 @@ public class EnvironmentScan {
                 }
                 // fill the block position in the array
                 blockData[arrayX][arrayY][arrayZ] = block;
+
+                // Check for air below the current block
+                // We can also add checks for blocks that have lava above them or something
+                if(blockId == AIR && arrayY > 0){
+                    DwarfNode below = blockData[arrayX][arrayY - 1][arrayZ];
+                    if (below.type == AIR){
+                        block.extraCost += 1;
+                    }
+                }
             }
         }
         // calculate dwarfs position (always in center of arr)
@@ -176,6 +185,9 @@ public class EnvironmentScan {
         DwarfNode dwarfPos = new DwarfNode(centerIndexX, centerIndexY, centerIndexZ, DWARF);
         blockData[centerIndexX][centerIndexY][centerIndexZ] = dwarfPos;
         oreData.computeIfAbsent(DWARF, k -> new ArrayList<>()).add(dwarfPos);
+
+        printAllLayers(blockData); // PRINT THE LAYERS
+
         return blockData;
     }
 
@@ -234,6 +246,23 @@ public class EnvironmentScan {
         int worldZ = this.worldOriginZ + arrayZ;
         return new BlockPos(worldX, worldY, worldZ);
     }
+
+    public void printAllLayers(DwarfNode[][][] blockData) {
+        int sizeY = blockData[0].length;
+
+        for (int y = 0; y < sizeY; y++) {
+            System.out.println("Layer Y: " + y );
+            for (int z = 0; z < blockData[0][0].length; z++) {
+                for (int x = 0; x < blockData.length; x++) {
+                    DwarfNode node = blockData[x][y][z];
+                    System.out.printf("%d/%d ", node.type, node.extraCost);  // prints it out in block type/extra cost format used to see if my fix was working
+                }
+                System.out.println();
+            }
+            System.out.println();
+        }
+    }
+
 
     // CONSTANTS
     // dwarf identifier value

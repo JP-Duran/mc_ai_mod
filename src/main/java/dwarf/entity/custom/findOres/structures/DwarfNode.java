@@ -20,6 +20,11 @@ public class DwarfNode {
     // neighbor list
     public ArrayList<DwarfNode> neighbors;
 
+    // Variable used to increase the "cost" a block has
+    // If a certain block is undesirable to pathfind through, this can be used to
+    // make it pathfind around it
+    public int extraCost;
+
     // node constructor
     public DwarfNode(int x, int y, int z, int type) {
         this.X = x;
@@ -31,6 +36,7 @@ public class DwarfNode {
         this.gScore = Integer.MAX_VALUE;
         this.parent = null;
         this.neighbors = new ArrayList<>();
+        this.extraCost = 0;
     }
 
     // returns the manhattan distance between two DwarfNodes
