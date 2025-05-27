@@ -2,11 +2,11 @@ package dwarf.entity.custom;
 
 import dwarf.entity.ModEntities;
 import dwarf.entity.custom.findOres.*;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
@@ -19,12 +19,14 @@ import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.inventory.SimpleInventory;
 
+import java.util.List;
 import java.util.Set;
 
 public class DwarfEntity extends MerchantEntity {
@@ -35,6 +37,9 @@ public class DwarfEntity extends MerchantEntity {
 
     private int idleAnimationTimeout = 0;
     private final SimpleInventory inventory = new SimpleInventory(27); // 27 is the size of a chest
+
+    private List<BlockPos> currentPath = null;
+    private int pathIndex = 0;
 
     //List of items it will try to pickup, add new items here if you want to add/remove one
     private static final Set<Item> pickUpItemsList = Set.of(
@@ -99,11 +104,56 @@ public class DwarfEntity extends MerchantEntity {
                 }
             }
         }
-        if (this.getWorld().isClient()) {
-            // Force update animation states every tick
-            updateAnimationStates(); //animations may not be working, but I've left the remains of the attempts in case
-            //someone else wants to give it a shot
+//        if (this.getWorld().isClient()) {
+//            // Force update animation states every tick
+//            updateAnimationStates(); //animations may not be working, but I've left the remains of the attempts in case
+//            //someone else wants to give it a shot
+//        }
+        if (!this.getWorld().isClient() && currentPath != null && pathIndex < currentPath.size()) {
+
+            BlockPos target = currentPath.get(pathIndex);
+            double dx = target.getX() + 0.5 - this.getX();
+            double dy = target.getY() - this.getY();
+            double dz = target.getZ() + 0.5 - this.getZ();
+
+            double distanceSq = dx * dx + dy * dy + dz * dz;
+
+            // Stop the dwarf if it is within two blocks of the ore
+            // We can change this later
+            if (distanceSq < 2) {
+                // Arrived at target block, mine it this doesn't work for some reason
+                if (!this.getWorld().isAir(target)) {
+                    this.getWorld().breakBlock(target, true, this);
+                }
+                pathIndex++;
+            } else {
+                double speed = 0.3;
+
+                // Set horizontal velocity, don't change vertical
+                this.setVelocity(dx * speed, this.getVelocity().y, dz * speed);
+                this.velocityDirty = true; // We changed the velocity so this tells teh game to update it
+
+                // Check if block in front is solid and dwarf is on the ground
+                int stepX = (int) Math.signum(dx);
+                int stepZ = (int) Math.signum(dz);
+                BlockPos front = this.getBlockPos().add(stepX, 0, stepZ);
+                BlockPos aboveFront = front.up();
+
+                boolean blockInFront = !this.getWorld().isAir(front);
+                boolean airAboveFront = this.getWorld().isAir(aboveFront);
+
+                // This is responsible for the dwarf towering up
+                if (dy > 0.5 && Math.abs(dx) < 1 && Math.abs(dz) < 1 && this.isOnGround()) {
+                    this.jump();
+                    this.getWorld().setBlockState(this.getBlockPos(), Blocks.COBBLESTONE.getDefaultState());
+                }
+
+                if (this.isOnGround() && blockInFront && airAboveFront) {
+                    this.jump(); // Use the built in minecraft jump physics
+                }
+            }
         }
+
     }
 
     private void updateAnimationStates() {
@@ -140,6 +190,15 @@ public class DwarfEntity extends MerchantEntity {
                 .add(EntityAttributes.MAX_HEALTH, 18)
                 .add(EntityAttributes.MOVEMENT_SPEED, 0.35)
                 .add(EntityAttributes.ATTACK_DAMAGE, 1);
+    }
+
+    public void setPath(List<BlockPos> path) {
+        this.currentPath = path;
+        this.pathIndex = 0;
+    }
+
+    public List<BlockPos> getCurrentPath() {
+        return this.currentPath;
     }
 
     @Override

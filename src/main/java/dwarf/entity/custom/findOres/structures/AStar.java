@@ -1,15 +1,15 @@
 package dwarf.entity.custom.findOres.structures;
 
 import dwarf.entity.custom.findOres.EnvironmentScan;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.Collections;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AStar {
-    public AStar(World world, BlockPos centerPos, int scanRadius) {
+    public static List<BlockPos> findPath(World world, BlockPos centerPos, int scanRadius) {
         // scan the environment
         EnvironmentScan env = new EnvironmentScan(world, centerPos, scanRadius);
         // create a priority queue
@@ -18,8 +18,16 @@ public class AStar {
         int size = (2 * scanRadius) + 1;
 
         // initialize search
-        DwarfNode startNode = env.getSpecificOreData(EnvironmentScan.DWARF).get(0);
-        DwarfNode goalNode = env.getSpecificOreData(EnvironmentScan.DIAMOND).get(0);
+        List<DwarfNode> dwarfNodes = env.getSpecificOreData(EnvironmentScan.DWARF);
+        List<DwarfNode> diamondNodes = env.getSpecificOreData(EnvironmentScan.DIAMOND);
+
+        if (dwarfNodes == null || dwarfNodes.isEmpty() || diamondNodes == null || diamondNodes.isEmpty()) {
+            return null; // Need to figure out how to handle the return but it works
+        }
+
+        DwarfNode startNode = dwarfNodes.get(0);
+        DwarfNode goalNode = diamondNodes.get(0);
+
         System.out.println("Start node = ");
         startNode.printNode();
         System.out.println("Goal node = ");
@@ -32,23 +40,17 @@ public class AStar {
 
         while (!queue.isEmpty()) {
             DwarfNode current = queue.poll();
-            // if the current node is the goal node, path has been found
-            if (DwarfNode.isEqual(current, goalNode)) {
-                System.out.println("PATH FOUND");
-                ArrayList<DwarfNode> path = new ArrayList<>();
+            if(DwarfNode.isEqual(current, goalNode)){
+                // Build and return the path
+                ArrayList<BlockPos> path = new ArrayList<>();
                 current = current.parent;
-                while (current != startNode) {
-                    path.add(current);
+                while(current != startNode){
+                    path.add(env.getBlockPosFromArrayNode(current));
                     current = current.parent;
                 }
-                path.add(current);
-                while (!path.isEmpty()) {
-                    current = path.removeLast();
-                    current.printNode();
-                    BlockState pathBlockState = Blocks.RED_STAINED_GLASS.getDefaultState();
-                    world.setBlockState(env.getBlockPosFromArrayNode(current), pathBlockState, 3);
-                }
-                return;
+                path.add(env.getBlockPosFromArrayNode(startNode));
+                Collections.reverse(path);
+                return path;
             }
             // mark current node as visited
             current.visited = true;
@@ -80,5 +82,6 @@ public class AStar {
                 }
             }
         }
+        return new ArrayList<>();
     }
 }

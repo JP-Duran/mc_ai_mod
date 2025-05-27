@@ -6,12 +6,12 @@ import dwarf.entity.custom.findOres.structures.DwarfNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+
+import java.util.List;
 
 public abstract class FindOre extends Goal {
     protected final DwarfEntity dwarf;
@@ -27,9 +27,9 @@ public abstract class FindOre extends Goal {
 
     @Override
     public boolean canStart() {
-        if (activeGoal != null && activeGoal != this) {
-            return false;
-        }
+//        if (activeGoal != null && activeGoal != this) {
+//            return false;
+//        }
 
         BlockPos pos = dwarf.getBlockPos();
         World world = dwarf.getWorld();
@@ -50,14 +50,15 @@ public abstract class FindOre extends Goal {
             return;
         }
 
-        // If we're close enough to the target, mine it
-        if (dwarf.getBlockPos().isWithinDistance(targetOre, 2)) {
-            mineOre(targetOre);
-            return;
+        if (dwarf.getCurrentPath() == null || dwarf.getCurrentPath().isEmpty()) {
+            List<BlockPos> path = AStar.findPath(dwarf.getWorld(), dwarf.getBlockPos(), scanRadius);
+            if (path != null  && !path.isEmpty()) {
+                dwarf.setPath(path);
+            } else {
+                targetOre = null;  // No path found
+                activeGoal = null;
+            }
         }
-
-        // Check if we need to break blocks or recalculate path
-        moveToTarget(dwarf.getBlockPos(), targetOre);
     }
 
     @Override
@@ -66,22 +67,13 @@ public abstract class FindOre extends Goal {
 
         BlockPos pos = dwarf.getBlockPos();
         World world = dwarf.getWorld();
+        BlockPos closestOre = scanForOres();
 
-        BlockPos closestOre = null;
-        double closestDistance = Double.MAX_VALUE;
-
-        for (BlockPos blockPosition : BlockPos.iterateOutwards(pos, scanRadius, scanRadius, scanRadius)) {
-            if (isTargetOre(world.getBlockState(blockPosition).getBlock()) &&
-                    pos.getSquaredDistance(blockPosition) < closestDistance) {
-
-                closestOre = blockPosition.toImmutable();
-                closestDistance = pos.getSquaredDistance(blockPosition);
-            }
-        }
+        System.out.println("Inside start");
 
         if (closestOre != null) {
             // TODO remove
-            AStar path = new AStar(world, pos, scanRadius);
+            List<BlockPos> path = AStar.findPath(world, pos, scanRadius);
             //EnvironmentScan scan = new EnvironmentScan(world, pos, scanRadius);
             //print3DArraySlices(scan.blockData);
             targetOre = closestOre;
@@ -91,64 +83,30 @@ public abstract class FindOre extends Goal {
     }
 
 
+    protected BlockPos scanForOres() {
+        BlockPos pos = dwarf.getBlockPos();
+        World world = dwarf.getWorld();
+
+        BlockPos closestOre = null;
+        double closestDistance = Double.MAX_VALUE;
+
+        for (BlockPos blockPosition : BlockPos.iterateOutwards(pos, scanRadius, scanRadius, scanRadius)) {
+            if (isTargetOre(world.getBlockState(blockPosition).getBlock())) {
+                double distance = pos.getSquaredDistance(blockPosition);
+                if (distance < closestDistance) {
+                    closestOre = blockPosition.toImmutable();
+                    closestDistance = distance;
+                }
+            }
+        }
+
+        return closestOre;
+    }
+
+
     @Override
     public boolean shouldContinue() {
         return targetOre != null && activeGoal == this;
-    }
-
-
-    protected void mineOre(BlockPos orePos) {
-        World world = dwarf.getWorld();
-
-        // Check if the block is still the target ore
-        if (isTargetOre(world.getBlockState(orePos).getBlock())) {
-            // Break the ore and drop items
-            world.breakBlock(orePos, true, dwarf);
-
-            // Reset target so dwarf looks for more ore
-            targetOre = null;
-        }
-    }
-
-    protected void moveToTarget(BlockPos start, BlockPos end) {
-        Path path = dwarf.getNavigation().findPathTo(end.getX(), end.getY(), end.getZ(), 0);
-        placeTorch();
-
-        // Check if we're at the ore position
-        if (start.isWithinDistance(end, 2)) {
-            mineOre(end);
-            return;
-        }
-
-        // First try to follow the path if we found one
-        if (path != null) {
-            dwarf.getNavigation().startMovingAlong(path, 1.0D);
-        }
-
-        // If we're not following a path or stuck then break blocks
-        if (!dwarf.getNavigation().isFollowingPath()) {
-            World world = dwarf.getWorld();
-            Vec3i direction = end.subtract(start);
-            int x = Integer.signum(direction.getX());
-            int y = Integer.signum(direction.getY());
-            int z = Integer.signum(direction.getZ());
-
-            BlockPos faceLevelPos = start.add(x, y + 1, z);
-            BlockPos footLevelPos = start.add(x, y, z);
-
-            // If there are blocks in the way, break them
-            if (!world.isAir(faceLevelPos) || !world.isAir(footLevelPos)) {
-                if (!world.isAir(faceLevelPos)) {
-                    world.breakBlock(faceLevelPos, true, dwarf);
-                }
-                if (!world.isAir(footLevelPos)) {
-                    world.breakBlock(footLevelPos, true, dwarf);
-                }
-
-                // Try to move after breaking blocks
-                dwarf.getNavigation().startMovingTo(end.getX(), end.getY(), end.getZ(), 1.0D);
-            }
-        }
     }
 
     protected void placeTorch() {
