@@ -8,7 +8,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Items;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -45,17 +48,36 @@ public abstract class FindOre extends Goal {
 
     @Override
     public void tick() {
-        if (targetOre == null) {
-            start();
+        System.out.println("Target ore at: " + targetOre.getX() + targetOre.getY() + targetOre.getZ());
+        if (targetOre != null && dwarf.getPos().squaredDistanceTo(Vec3d.ofCenter(targetOre)) < 3) {
+
+            // Mine the ore
+            if (!dwarf.getWorld().isAir(targetOre)) {
+                dwarf.getWorld().breakBlock(targetOre, true, dwarf);
+            }
+
+            targetOre = null; // Clear so we find a new one
+            dwarf.setPath(null);
+            activeGoal = null;
+            System.out.println("CLEARED TARGET IN FINDORE");
             return;
         }
 
-        if (dwarf.getCurrentPath() == null || dwarf.getCurrentPath().isEmpty()) {
+        // Find a new target if none
+//        if (targetOre == null) {
+//            System.out.println("Target is none, finding new ore inside findOre");
+//            start();
+//            return;
+//        }
+
+        if ((dwarf.getCurrentPath() == null || dwarf.getCurrentPath().isEmpty()) && targetOre != null) {
+            System.out.println("Path empty, trying to recompute");
             List<BlockPos> path = AStar.findPath(dwarf.getWorld(), dwarf.getBlockPos(), scanRadius);
-            if (path != null  && !path.isEmpty()) {
+            if (path != null && !path.isEmpty()) {
                 dwarf.setPath(path);
             } else {
-                targetOre = null;  // No path found
+                System.out.println("Path still null, abandoning target");
+                targetOre = null;
                 activeGoal = null;
             }
         }
@@ -72,11 +94,22 @@ public abstract class FindOre extends Goal {
         System.out.println("Inside start");
 
         if (closestOre != null) {
-            // TODO remove
-            List<BlockPos> path = AStar.findPath(world, pos, scanRadius);
-            //EnvironmentScan scan = new EnvironmentScan(world, pos, scanRadius);
-            //print3DArraySlices(scan.blockData);
             targetOre = closestOre;
+            List<BlockPos> path = AStar.findPath(world, pos, scanRadius);
+            if(path != null && !path.isEmpty()){
+
+                for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
+                    player.sendMessage(Text.literal("Found Path!"), false);
+                }
+
+                dwarf.setPath(path);
+            } else{
+                for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
+                    player.sendMessage(Text.literal("No ore found"), false);
+                }
+                targetOre = null;
+                activeGoal = null;
+            }
         } else {
             activeGoal = null;
         }

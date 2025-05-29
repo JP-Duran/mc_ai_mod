@@ -85,6 +85,7 @@ public class EnvironmentScan {
         if (block == Blocks.IRON_ORE || block == Blocks.DEEPSLATE_IRON_ORE) return IRON;
         if (block == Blocks.COPPER_ORE || block == Blocks.DEEPSLATE_COPPER_ORE) return COPPER;
         if (block == Blocks.COAL_ORE || block == Blocks.DEEPSLATE_COAL_ORE) return COAL;
+        if (block == Blocks.LAVA) return LAVA;
         // for clear roof application (alg visibility setups)
         if (block == Blocks.GLASS) return GLASS;
         // default return value (if block not specified)
@@ -116,6 +117,9 @@ public class EnvironmentScan {
 
         // fill the 3d arr
         for (BlockPos currentWorldPos : BlockPos.iterateOutwards(centerPos, scanRadius, scanRadius, scanRadius)) {
+
+            int[][] directions = {{0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}};
+
             int arrayX = currentWorldPos.getX() - worldOriginX;
             int arrayY = currentWorldPos.getY() - worldOriginY;
             int arrayZ = currentWorldPos.getZ() - worldOriginZ;
@@ -161,6 +165,12 @@ public class EnvironmentScan {
                         COAL_COUNT++;
                         oreData.computeIfAbsent(COAL, k -> new ArrayList<>()).add(block);
                         break;
+                    case LAVA:
+                        oreData.computeIfAbsent(LAVA, k -> new ArrayList<>()).add(block);
+                        break;
+                    case OBSIDIAN:
+                        oreData.computeIfAbsent(OBSIDIAN, k -> new ArrayList<>()).add(block);
+                        break;
                     default:
                         break;
                 }
@@ -175,6 +185,18 @@ public class EnvironmentScan {
                         block.extraCost += 1;
                     }
                 }
+
+                // For some reason it only updates blocks to the side not above or below
+                for(int[] direction : directions){
+                    int x = arrayX + direction[0];
+                    int y = arrayY + direction[1];
+                    int z = arrayZ + direction[2];
+
+                    if(x >= 0 && x < size && y >= 0 && y > size && z >= 0 && z > size){
+                        blockData[x][y][z].extraCost = LAVA;
+                    }
+                }
+
             }
         }
         // calculate dwarfs position (always in center of arr)
@@ -186,7 +208,9 @@ public class EnvironmentScan {
         blockData[centerIndexX][centerIndexY][centerIndexZ] = dwarfPos;
         oreData.computeIfAbsent(DWARF, k -> new ArrayList<>()).add(dwarfPos);
 
-        printAllLayers(blockData); // PRINT THE LAYERS
+        //printAllLayers(blockData); // PRINT THE LAYERS
+
+        System.out.println("Returning blockData from EnvironmentScan");
 
         return blockData;
     }
@@ -282,6 +306,8 @@ public class EnvironmentScan {
     final public static int IRON = 94;
     final public static int COPPER = 93;
     final public static int COAL = 92;
+    final public static int LAVA = 9999;
+    final public static int OBSIDIAN = 900;
     // utility values
     final public static int GLASS = 1000;
     final public static int OOB = 999;

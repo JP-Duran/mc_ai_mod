@@ -40,6 +40,7 @@ public class DwarfEntity extends MerchantEntity {
 
     private List<BlockPos> currentPath = null;
     private int pathIndex = 0;
+    private int jumpTimer = -1;
 
     //List of items it will try to pickup, add new items here if you want to add/remove one
     private static final Set<Item> pickUpItemsList = Set.of(
@@ -109,25 +110,59 @@ public class DwarfEntity extends MerchantEntity {
 //            updateAnimationStates(); //animations may not be working, but I've left the remains of the attempts in case
 //            //someone else wants to give it a shot
 //        }
+
         if (!this.getWorld().isClient() && currentPath != null && pathIndex < currentPath.size()) {
 
+            System.out.println("Current pathIndex: " + pathIndex + "/" + currentPath.size());
+
             BlockPos target = currentPath.get(pathIndex);
+
+            System.out.println("Target block: " + target.getX() + ", " + target.getY() + ", " + target.getZ());
+
+            // Place a support block below the dwarf
+            BlockPos supportBlockPos = target.down();
+
+            boolean isPathBlockBelow = currentPath != null && currentPath.contains(supportBlockPos);
+
+            BlockPos oneBelow = supportBlockPos.down(); // two blocks below current
+
+            boolean shouldBridge =
+                    this.getWorld().isAir(supportBlockPos) &&         // Air directly under
+                            this.getWorld().isAir(oneBelow) &&               // Air 2 blocks below = not just stepping down
+                           !isPathBlockBelow;
+            if (shouldBridge) {
+                this.getWorld().setBlockState(supportBlockPos, Blocks.COBBLESTONE.getDefaultState());
+            }
+
             double dx = target.getX() + 0.5 - this.getX();
             double dy = target.getY() - this.getY();
             double dz = target.getZ() + 0.5 - this.getZ();
 
             double distanceSq = dx * dx + dy * dy + dz * dz;
 
+            System.out.println("Dwarf at: " + this.getBlockPos());
+            System.out.println("dx: " + dx + " dy: " + dy + " dz: " + dz);
+            System.out.println("Is on ground: " + this.isOnGround());
+            System.out.println("Velocity: " + this.getVelocity());
+
             // Stop the dwarf if it is within two blocks of the ore
             // We can change this later
-            if (distanceSq < 2) {
+            if (distanceSq < 2.0) {
                 // Arrived at target block, mine it this doesn't work for some reason
-                if (!this.getWorld().isAir(target)) {
-                    this.getWorld().breakBlock(target, true, this);
+                BlockPos blockInWay = new BlockPos(
+                        (int) Math.floor(this.getX() + dx * 0.5),
+                        (int) Math.floor(this.getY()),
+                        (int) Math.floor(this.getZ() + dz * 0.5)
+                );
+
+                if (!this.getWorld().isAir(blockInWay) && this.getBlockPos().equals(blockInWay.down())) {
+                    System.out.println("Breaking obstructing block at: " + blockInWay);
+                    this.getWorld().breakBlock(blockInWay, true, this);
                 }
+                System.out.println("At: " + currentPath.get(pathIndex).getX() + currentPath.get(pathIndex).getY() + currentPath.get(pathIndex).getZ());
                 pathIndex++;
             } else {
-                double speed = 0.3;
+                double speed = 0.2;
 
                 // Set horizontal velocity, don't change vertical
                 this.setVelocity(dx * speed, this.getVelocity().y, dz * speed);
@@ -142,15 +177,27 @@ public class DwarfEntity extends MerchantEntity {
                 boolean blockInFront = !this.getWorld().isAir(front);
                 boolean airAboveFront = this.getWorld().isAir(aboveFront);
 
-                // This is responsible for the dwarf towering up
-                if (dy > 0.5 && Math.abs(dx) < 1 && Math.abs(dz) < 1 && this.isOnGround()) {
-                    this.jump();
-                    this.getWorld().setBlockState(this.getBlockPos(), Blocks.COBBLESTONE.getDefaultState());
-                }
-
                 if (this.isOnGround() && blockInFront && airAboveFront) {
                     this.jump(); // Use the built in minecraft jump physics
                 }
+
+                // This is responsible for the dwarf towering up
+                if (dy > 0.5 && Math.abs(dx) < 1 && Math.abs(dz) < 1 && this.isOnGround()) {
+                    this.jump();
+                    System.out.println("JUMPING!!!!!!!!!!!");
+                    // Wait until it's off the ground (next tick) before placing a block
+                    this.jumpTimer = 6;
+                }
+
+                if(jumpTimer > 0){
+                    jumpTimer--;
+                }
+
+                if (this.jumpTimer == 0 && !this.isOnGround()) {
+                    this.getWorld().setBlockState(this.getBlockPos().down(), Blocks.COBBLESTONE.getDefaultState());
+                    this.jumpTimer = -1;
+                }
+
             }
         }
 
@@ -193,6 +240,7 @@ public class DwarfEntity extends MerchantEntity {
     }
 
     public void setPath(List<BlockPos> path) {
+        System.out.println("Setting path inside DwarfEntity");
         this.currentPath = path;
         this.pathIndex = 0;
     }
