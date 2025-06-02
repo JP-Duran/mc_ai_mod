@@ -19,7 +19,7 @@ import java.util.List;
 public abstract class FindOre extends Goal {
     protected final DwarfEntity dwarf;
     protected static final int scanRadius = 10;
-    protected BlockPos targetOre = null;
+    protected static BlockPos targetOre = null;
     protected static final int torchLightLevel = 5;
 
     private static FindOre activeGoal = null;
@@ -48,39 +48,39 @@ public abstract class FindOre extends Goal {
 
     @Override
     public void tick() {
-        System.out.println("Target ore at: " + targetOre.getX() + targetOre.getY() + targetOre.getZ());
-        if (targetOre != null && dwarf.getPos().squaredDistanceTo(Vec3d.ofCenter(targetOre)) < 3) {
+//        System.out.println("Target ore at: " + targetOre.getX() + targetOre.getY() + targetOre.getZ());
+//        if (targetOre != null && dwarf.getPos().squaredDistanceTo(Vec3d.ofCenter(targetOre)) < 3) {
+//
+//            // Mine the ore
+//            if (!dwarf.getWorld().isAir(targetOre)) {
+//                dwarf.getWorld().breakBlock(targetOre, true, dwarf);
+//            }
+//
+//            targetOre = null; // Clear so we find a new one
+//            dwarf.setPath(null);
+//            activeGoal = null;
+//            System.out.println("CLEARED TARGET IN FINDORE");
+//            return;
+//        }
 
-            // Mine the ore
-            if (!dwarf.getWorld().isAir(targetOre)) {
-                dwarf.getWorld().breakBlock(targetOre, true, dwarf);
-            }
-
-            targetOre = null; // Clear so we find a new one
-            dwarf.setPath(null);
-            activeGoal = null;
-            System.out.println("CLEARED TARGET IN FINDORE");
-            return;
-        }
-
-        // Find a new target if none
+//        // Find a new target if none
 //        if (targetOre == null) {
 //            System.out.println("Target is none, finding new ore inside findOre");
 //            start();
 //            return;
 //        }
-
-        if ((dwarf.getCurrentPath() == null || dwarf.getCurrentPath().isEmpty()) && targetOre != null) {
-            System.out.println("Path empty, trying to recompute");
-            List<BlockPos> path = AStar.findPath(dwarf.getWorld(), dwarf.getBlockPos(), scanRadius);
-            if (path != null && !path.isEmpty()) {
-                dwarf.setPath(path);
-            } else {
-                System.out.println("Path still null, abandoning target");
-                targetOre = null;
-                activeGoal = null;
-            }
-        }
+//
+//        if ((dwarf.getCurrentPath() == null || dwarf.getCurrentPath().isEmpty()) && targetOre != null) {
+//            System.out.println("Path empty, trying to recompute");
+//            List<BlockPos> path = AStar.findPath(dwarf.getWorld(), dwarf.getBlockPos(), scanRadius);
+//            if (path != null && !path.isEmpty()) {
+//                dwarf.setPath(path);
+//            } else {
+//                System.out.println("Path still null, abandoning target");
+//                targetOre = null;
+//                activeGoal = null;
+//            }
+//        }
     }
 
     @Override
@@ -204,4 +204,21 @@ public abstract class FindOre extends Goal {
             System.out.println();
         }
     }
+
+    public static void fixStuckDwarf(DwarfEntity dwarf){
+        targetOre = null;
+        dwarf.setPath(null);
+        activeGoal = null;
+    }
+
+    public static void breakTarget(DwarfEntity dwarf){
+        dwarf.getWorld().breakBlock(targetOre, true, dwarf);
+
+        targetOre = null;
+        dwarf.setPath(null);
+        activeGoal = null;
+    }
 }
+
+
+

@@ -20,6 +20,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.World;
@@ -41,6 +42,10 @@ public class DwarfEntity extends MerchantEntity {
     private List<BlockPos> currentPath = null;
     private int pathIndex = 0;
     private int jumpTimer = -1;
+    private int stuckTimer = 50;
+    double prevX = this.getX();
+    double prevY = this.getY();
+    double prevZ = this.getZ();
 
     //List of items it will try to pickup, add new items here if you want to add/remove one
     private static final Set<Item> pickUpItemsList = Set.of(
@@ -92,8 +97,7 @@ public class DwarfEntity extends MerchantEntity {
     public void tick() {
         super.tick();
 
-        //not client check, as item pickup is server side
-        if (!this.getWorld().isClient()) { //the 2 in the expand below is the area in which it can "see" items to pickup
+        if (!this.getWorld().isClient()) {
             for (ItemEntity itemEntity : this.getWorld().getEntitiesByClass(ItemEntity.class, this.getBoundingBox().expand(2.0), i -> true)) {
                 ItemStack stack = itemEntity.getStack();
                 if (pickUpItemsList.contains(stack.getItem())) {
@@ -104,104 +108,103 @@ public class DwarfEntity extends MerchantEntity {
                     }
                 }
             }
-        }
-//        if (this.getWorld().isClient()) {
-//            // Force update animation states every tick
-//            updateAnimationStates(); //animations may not be working, but I've left the remains of the attempts in case
-//            //someone else wants to give it a shot
-//        }
 
-        if (!this.getWorld().isClient() && currentPath != null && pathIndex < currentPath.size()) {
+            // Path Following Logic
+            if (currentPath != null && pathIndex < currentPath.size()) {
+                BlockPos target = currentPath.get(pathIndex);
+                Vec3d targetCenter = new Vec3d(target.getX() + 0.5, target.getY(), target.getZ() + 0.5);
+                double dx = targetCenter.x - this.getX();
+                double dy = targetCenter.y - this.getY();
+                double dz = targetCenter.z - this.getZ();
+                double distanceSq = this.getPos().squaredDistanceTo(targetCenter);
 
-            System.out.println("Current pathIndex: " + pathIndex + "/" + currentPath.size());
+                // Bridging logic for walking over gaps
+                BlockPos supportPos = target.down();
+                boolean needsBridge = this.getWorld().isAir(supportPos)
+                        && this.getWorld().isAir(supportPos.down())
+                        && !currentPath.contains(supportPos);
+                if (needsBridge) {
+                    this.getWorld().setBlockState(supportPos, Blocks.COBBLESTONE.getDefaultState());
+                }
 
-            BlockPos target = currentPath.get(pathIndex);
+                // Stuck detection, wiat 50 ticks, if position hasn't changed, clear path and find new one
+                if (this.getX() == prevX && this.getY() == prevY && this.getZ() == prevZ) {
+                    stuckTimer--;
+                    if (stuckTimer <= 0) {
+                        System.out.println("Dwarf is stuck!");
+                        FindOre.fixStuckDwarf(this);
+                        stuckTimer = 50;
+                    }
+                } else {
+                    prevX = this.getX();
+                    prevY = this.getY();
+                    prevZ = this.getZ();
+                    stuckTimer = 50;
+                }
 
-            System.out.println("Target block: " + target.getX() + ", " + target.getY() + ", " + target.getZ());
+                //Reached current path node
+                if (distanceSq < 0.5) {
+                    System.out.println("Reached: " + currentPath.get(pathIndex));
 
-            // Place a support block below the dwarf
-            BlockPos supportBlockPos = target.down();
+                    // Break the next block in the path if it's not air
+                    if (pathIndex + 1 < currentPath.size()) {
+                        BlockPos nextTarget = currentPath.get(pathIndex + 1);
+                        System.out.println("Breaking next path block: " + nextTarget);
+                        this.getWorld().breakBlock(nextTarget, true, this);
+                    }
 
-            boolean isPathBlockBelow = currentPath != null && currentPath.contains(supportBlockPos);
+                    pathIndex++;
+                }else {
+                    double speed = 0.2;
 
-            BlockPos oneBelow = supportBlockPos.down(); // two blocks below current
+                    // Set horizontal velocity
+                    this.setVelocity(dx * speed, this.getVelocity().y, dz * speed);
+                    this.velocityDirty = true;
 
-            boolean shouldBridge =
-                    this.getWorld().isAir(supportBlockPos) &&         // Air directly under
-                            this.getWorld().isAir(oneBelow) &&               // Air 2 blocks below = not just stepping down
-                           !isPathBlockBelow;
-            if (shouldBridge) {
-                this.getWorld().setBlockState(supportBlockPos, Blocks.COBBLESTONE.getDefaultState());
+                    // Determine front block
+                    int stepX = (int) Math.signum(dx);
+                    int stepZ = (int) Math.signum(dz);
+                    BlockPos front = this.getBlockPos().add(stepX, 0, stepZ);
+                    BlockPos aboveFront = front.up();
+
+                    boolean blockInFront = !this.getWorld().isAir(front);
+                    boolean airAboveFront = this.getWorld().isAir(aboveFront);
+
+                    // Jump if there's a block in front
+                    if (this.isOnGround() && blockInFront && airAboveFront) {
+                        this.jump();
+                    }
+
+                    // Tower up if needed
+                    if (dy > 0.5 && Math.abs(dx) < 1 && Math.abs(dz) < 1 && this.isOnGround()) {
+                        BlockPos above = this.getBlockPos().up();
+
+                        if (!this.getWorld().isAir(above)) {
+                            this.getWorld().breakBlock(above, true, this);
+                        }
+                        this.jump();
+                        this.jumpTimer = 6;
+                    }
+
+                    if (jumpTimer > 0) jumpTimer--;
+
+                    if (this.jumpTimer == 0 && !this.isOnGround()) {
+                        this.getWorld().setBlockState(this.getBlockPos().down(), Blocks.COBBLESTONE.getDefaultState());
+                        this.jumpTimer = -1;
+                    }
+                }
+
+
             }
 
-            double dx = target.getX() + 0.5 - this.getX();
-            double dy = target.getY() - this.getY();
-            double dz = target.getZ() + 0.5 - this.getZ();
-
-            double distanceSq = dx * dx + dy * dy + dz * dz;
-
-            System.out.println("Dwarf at: " + this.getBlockPos());
-            System.out.println("dx: " + dx + " dy: " + dy + " dz: " + dz);
-            System.out.println("Is on ground: " + this.isOnGround());
-            System.out.println("Velocity: " + this.getVelocity());
-
-            // Stop the dwarf if it is within two blocks of the ore
-            // We can change this later
-            if (distanceSq < 2.0) {
-                // Arrived at target block, mine it this doesn't work for some reason
-                BlockPos blockInWay = new BlockPos(
-                        (int) Math.floor(this.getX() + dx * 0.5),
-                        (int) Math.floor(this.getY()),
-                        (int) Math.floor(this.getZ() + dz * 0.5)
-                );
-
-                if (!this.getWorld().isAir(blockInWay) && this.getBlockPos().equals(blockInWay.down())) {
-                    System.out.println("Breaking obstructing block at: " + blockInWay);
-                    this.getWorld().breakBlock(blockInWay, true, this);
-                }
-                System.out.println("At: " + currentPath.get(pathIndex).getX() + currentPath.get(pathIndex).getY() + currentPath.get(pathIndex).getZ());
-                pathIndex++;
-            } else {
-                double speed = 0.2;
-
-                // Set horizontal velocity, don't change vertical
-                this.setVelocity(dx * speed, this.getVelocity().y, dz * speed);
-                this.velocityDirty = true; // We changed the velocity so this tells teh game to update it
-
-                // Check if block in front is solid and dwarf is on the ground
-                int stepX = (int) Math.signum(dx);
-                int stepZ = (int) Math.signum(dz);
-                BlockPos front = this.getBlockPos().add(stepX, 0, stepZ);
-                BlockPos aboveFront = front.up();
-
-                boolean blockInFront = !this.getWorld().isAir(front);
-                boolean airAboveFront = this.getWorld().isAir(aboveFront);
-
-                if (this.isOnGround() && blockInFront && airAboveFront) {
-                    this.jump(); // Use the built in minecraft jump physics
-                }
-
-                // This is responsible for the dwarf towering up
-                if (dy > 0.5 && Math.abs(dx) < 1 && Math.abs(dz) < 1 && this.isOnGround()) {
-                    this.jump();
-                    System.out.println("JUMPING!!!!!!!!!!!");
-                    // Wait until it's off the ground (next tick) before placing a block
-                    this.jumpTimer = 6;
-                }
-
-                if(jumpTimer > 0){
-                    jumpTimer--;
-                }
-
-                if (this.jumpTimer == 0 && !this.isOnGround()) {
-                    this.getWorld().setBlockState(this.getBlockPos().down(), Blocks.COBBLESTONE.getDefaultState());
-                    this.jumpTimer = -1;
-                }
-
+            // Reached end of path, call findore to break the ore and reset path
+            if (currentPath != null && pathIndex >= currentPath.size()) {
+                System.out.println("Completed path, resetting");
+                FindOre.breakTarget(this);
             }
         }
-
     }
+
 
     private void updateAnimationStates() {
         // Check if the entity is moving
