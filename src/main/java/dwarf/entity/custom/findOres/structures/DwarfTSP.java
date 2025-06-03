@@ -4,8 +4,7 @@ import dwarf.entity.custom.findOres.EnvironmentScan;
 import dwarf.entity.custom.findOres.structures.OreGraph.DwarfNode;
 import dwarf.entity.custom.findOres.structures.OreGraph.GraphNode;
 import dwarf.entity.custom.findOres.structures.OreGraph.TSPGraph;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.List;
 import static dwarf.entity.custom.findOres.EnvironmentScan.DIAMOND;
 
 public class DwarfTSP {
-    public List<DwarfNode> runDwarfTSP(EnvironmentScan env) {
+    public ArrayList<DwarfNode> runDwarfTSP(EnvironmentScan env) {
         // initialize TSPGraph object
         TSPGraph graph = new TSPGraph();
         // get the list DwarfNodes representing all diamond ores in the scanned environment
@@ -35,6 +34,6 @@ public class DwarfTSP {
                 graph.addEdge(nodeList.get(i), nodeList.get(j), edgeWeight);
             }
         }
-
+        return new ArrayList<DwarfNode>();
     }
 }
