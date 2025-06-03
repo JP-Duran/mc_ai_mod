@@ -1,7 +1,6 @@
-package dwarf.entity.custom.findOres.structures;
+package dwarf.entity.custom.findOres.structures.OreGraph;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TSPGraph {
     // adjacency nested hash maps for weighted graph representation
@@ -31,6 +30,11 @@ public class TSPGraph {
     // returns the edge weight from node 'from' to node 'to'
     public Integer getEdgeWeight(GraphNode from, GraphNode to) {
         return adjacencyMap.get(from).get(to);
+    }
+
+    // returns an ArrayList<GraphNode> of all keys in the adjacencyMap (all graph nodes)
+    public ArrayList<GraphNode> getNodes() {
+        return new ArrayList<>(adjacencyMap.keySet());
     }
 
     // returns a Map<GraphNode, Integer> containing all neighbors and edge weights for

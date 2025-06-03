@@ -1,6 +1,8 @@
 package dwarf.entity.custom.findOres.structures;
 
 import dwarf.entity.custom.findOres.EnvironmentScan;
+import dwarf.entity.custom.findOres.structures.OreGraph.DwarfNode;
+import dwarf.entity.custom.findOres.structures.OreGraph.DwarfPriorityQueue;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 

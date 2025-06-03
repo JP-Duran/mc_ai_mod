@@ -1,6 +1,6 @@
 package dwarf.entity.custom.findOres;
 
-import dwarf.entity.custom.findOres.structures.DwarfNode;
+import dwarf.entity.custom.findOres.structures.OreGraph.DwarfNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;

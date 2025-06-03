@@ -1,4 +1,4 @@
-package dwarf.entity.custom.findOres.structures;
+package dwarf.entity.custom.findOres.structures.OreGraph;
 
 import java.util.ArrayList;
 

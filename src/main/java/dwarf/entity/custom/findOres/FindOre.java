@@ -2,7 +2,7 @@ package dwarf.entity.custom.findOres;
 
 import dwarf.entity.custom.DwarfEntity;
 import dwarf.entity.custom.findOres.structures.AStar;
-import dwarf.entity.custom.findOres.structures.DwarfNode;
+import dwarf.entity.custom.findOres.structures.OreGraph.DwarfNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.Goal;
@@ -11,7 +11,6 @@ import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.List;

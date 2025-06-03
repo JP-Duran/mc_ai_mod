@@ -1,6 +1,4 @@
-package dwarf.entity.custom.findOres.structures;
-
-import java.util.ArrayList;
+package dwarf.entity.custom.findOres.structures.OreGraph;
 
 public class GraphNode {
     // corresponding dwarf node (ore location)
