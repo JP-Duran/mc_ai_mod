@@ -15,8 +15,4 @@ public class FindDiamond extends FindOre {
         return block == Blocks.DIAMOND_ORE || block == Blocks.DEEPSLATE_DIAMOND_ORE;
     }
 
-    @Override
-    protected String getOreName() {
-        return "diamond";
-    }
 }

@@ -1,12 +1,9 @@
 package dwarf.entity.custom;
 
-import dwarf.entity.ModEntities;
 import dwarf.entity.custom.findOres.*;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
@@ -32,11 +29,6 @@ import java.util.Set;
 
 public class DwarfEntity extends MerchantEntity {
 
-    public final AnimationState idleAnimationState = new AnimationState();
-    public final AnimationState walkAnimationState = new AnimationState();
-    public final AnimationState runAnimationState = new AnimationState();
-
-    private int idleAnimationTimeout = 0;
     private final SimpleInventory inventory = new SimpleInventory(27); // 27 is the size of a chest
 
     private List<BlockPos> currentPath = null;
@@ -61,8 +53,10 @@ public class DwarfEntity extends MerchantEntity {
         return this.inventory;
     }
 
-    @Nullable
-    private TradeOfferList offers;
+    @Override
+    protected void fillRecipes() {
+
+    }
 
     public DwarfEntity(EntityType<? extends MerchantEntity> entityType, World world) {
         super(entityType, world);
@@ -70,28 +64,14 @@ public class DwarfEntity extends MerchantEntity {
 
     @Override
     protected void afterUsing(TradeOffer offer) {
-        // Empty implementation
-    }
 
-    @Override
-    protected void fillRecipes() {
-        // Empty implementation
     }
 
     @Override
     protected void initGoals() { //wander lowest priority so when it cant find anything it does it, then diamonds, etc
         //this.goalSelector.add(0, new WanderAroundFarGoal(this, 1.0D)); // UNCOMMENT TO ADD BACK WANDERING
         this.goalSelector.add(5, new FindDiamond(this));
-        //this.goalSelector.add(4, new FindEmerald(this));
-        //this.goalSelector.add(4, new FindGold(this));
-        //this.goalSelector.add(3, new FindLapis(this));
-        //this.goalSelector.add(2, new FindIron(this));
-        //this.goalSelector.add(1, new FindCoal(this));
-        //this.goalSelector.add(1, new FindCopper(this));
-        //this.goalSelector.add(1, new FindRedstone(this));
     }
-
-
 
     @Override
     public void tick() {
@@ -194,43 +174,13 @@ public class DwarfEntity extends MerchantEntity {
                     }
                 }
 
-
+                FindOre.placeTorch(this);
             }
             // Reached end of path, reset the path
             if (currentPath != null && pathIndex >= currentPath.size()) {
                 System.out.println("Completed path, resetting");
                 FindOre.resetPath(this);
             }
-        }
-    }
-
-
-    private void updateAnimationStates() {
-        // Check if the entity is moving
-        boolean isMoving = this.getVelocity().horizontalLengthSquared() > 0.0025D;
-
-        if (isMoving) {
-            // Check speed to determine walk vs run
-            float speed = (float) this.getVelocity().horizontalLength();
-
-            if (speed > 0.15f) {
-                // Running - start run animation, stop others
-                this.walkAnimationState.stop();
-                this.idleAnimationState.stop();
-                this.runAnimationState.startIfNotRunning(this.age);
-            } else {
-                // Walking - start walk animation, stop others
-                this.runAnimationState.stop();
-                this.idleAnimationState.stop();
-                this.walkAnimationState.startIfNotRunning(this.age);
-            }
-        } else {
-            // Not moving - idle animation
-            this.runAnimationState.stop();
-            this.walkAnimationState.stop();
-
-            // IMPORTANT CHANGE: Always start idle animation when not moving
-            this.idleAnimationState.startIfNotRunning(this.age);
         }
     }
 
@@ -251,11 +201,6 @@ public class DwarfEntity extends MerchantEntity {
         return this.currentPath;
     }
 
-    @Override
-    public @Nullable PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
-        return ModEntities.DWARF.create(world, SpawnReason.BREEDING);
-    }
-
     // Called when the player right clicks the dwarf
     @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
@@ -264,4 +209,10 @@ public class DwarfEntity extends MerchantEntity {
         }
         return ActionResult.SUCCESS;
     }
+
+    @Override
+    public @Nullable PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
+        return null;
+    }
+
 }
