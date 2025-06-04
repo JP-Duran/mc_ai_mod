@@ -27,9 +27,12 @@ public class DwarfTSP {
         for (int i = 0; i < nearestNeighborPath.size(); i++) {
             DwarfNode next = nearestNeighborPath.get(i).ore;
             path.addAll(AStar.findPath(env, current, next));
+            env.resetEnvironmentNodes();
             current = next;
         }
-        System.out.println("PATH SIZE = " + path.size());
+        for (BlockPos pos : path) {
+            System.out.println("( " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + " )");
+        }
         return path;
     }
 

@@ -179,20 +179,20 @@ public class EnvironmentScan {
 
                 // Check for air below the current block
                 // We can also add checks for blocks that have lava above them or something
-                if(blockId == AIR && arrayY > 0){
+                if (blockId == AIR && arrayY > 0) {
                     DwarfNode below = blockData[arrayX][arrayY - 1][arrayZ];
-                    if (below.type == AIR){
+                    if (below.type == AIR) {
                         block.extraCost += 1;
                     }
                 }
 
                 // For some reason it only updates blocks to the side not above or below
-                for(int[] direction : directions){
+                for (int[] direction : directions) {
                     int x = arrayX + direction[0];
                     int y = arrayY + direction[1];
                     int z = arrayZ + direction[2];
 
-                    if(x >= 0 && x < size && y >= 0 && y > size && z >= 0 && z > size){
+                    if (x >= 0 && x < size && y >= 0 && y > size && z >= 0 && z > size) {
                         blockData[x][y][z].extraCost = LAVA;
                     }
                 }
@@ -259,6 +259,24 @@ public class EnvironmentScan {
         int worldY = worldOriginY + localNode.Y;
         int worldZ = worldOriginZ + localNode.Z;
         return new BlockPos(worldX, worldY, worldZ);
+    }
+
+    public void resetEnvironmentNodes() {
+        // array dimensions
+        int size = (2 * scanRadius) + 1;
+        // calculate neighbors for all blocks
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                for (int k = 0; k < size; k++) {
+                    DwarfNode node = blockData[i][j][k];
+                    node.visited = false;
+                    node.fScore = Integer.MAX_VALUE;
+                    node.gScore = Integer.MAX_VALUE;
+                    node.parent = null;
+                    node.extraCost = 0;
+                }
+            }
+        }
     }
 
     /**
