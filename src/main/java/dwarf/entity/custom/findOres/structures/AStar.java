@@ -11,24 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AStar {
-    public static List<BlockPos> findPath(World world, BlockPos centerPos, int scanRadius) {
-        // scan the environment
-        EnvironmentScan env = new EnvironmentScan(world, centerPos, scanRadius);
+    public static List<BlockPos> findPath(EnvironmentScan env, DwarfNode start, DwarfNode end) {
         // create a priority queue
         DwarfPriorityQueue queue = new DwarfPriorityQueue();
-        // create a visited array
-        int size = (2 * scanRadius) + 1;
 
-        // initialize search
-        List<DwarfNode> dwarfNodes = env.getSpecificOreData(EnvironmentScan.DWARF);
-        List<DwarfNode> diamondNodes = env.getSpecificOreData(EnvironmentScan.DIAMOND);
-
-        if (dwarfNodes == null || dwarfNodes.isEmpty() || diamondNodes == null || diamondNodes.isEmpty()) {
-            return null; // Need to figure out how to handle the return but it works
-        }
-
-        DwarfNode startNode = dwarfNodes.get(0);
-        DwarfNode goalNode = diamondNodes.get(0);
+        // start and end nodes
+        DwarfNode startNode = start;
+        DwarfNode goalNode = end;
 
         System.out.println("Start node = ");
         startNode.printNode();
@@ -45,23 +34,16 @@ public class AStar {
             if(DwarfNode.isEqual(current, goalNode)){
                 // Build and return the path
                 ArrayList<BlockPos> path = new ArrayList<>();
-                current = current.parent;
-                while(current != startNode){
+                do {
                     path.add(env.getBlockPosFromArrayNode(current));
                     current = current.parent;
-                }
-                path.add(env.getBlockPosFromArrayNode(startNode));
+                } while (current != startNode);
+                path.add(env.getBlockPosFromArrayNode(current));
                 Collections.reverse(path);
                 return path;
             }
             // mark current node as visited
             current.visited = true;
-            /*
-            System.out.println("Current = ");
-            current.printNode();
-            System.out.println("Current neighbors = ");
-            System.out.println(current.neighbors);
-            */
             // for all neighbors of current block
             for (DwarfNode neighbor: current.neighbors) {
                 // if neighbor unvisited

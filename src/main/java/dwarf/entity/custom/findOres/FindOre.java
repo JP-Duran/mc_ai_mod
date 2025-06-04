@@ -2,6 +2,7 @@ package dwarf.entity.custom.findOres;
 
 import dwarf.entity.custom.DwarfEntity;
 import dwarf.entity.custom.findOres.structures.AStar;
+import dwarf.entity.custom.findOres.structures.DwarfTSP;
 import dwarf.entity.custom.findOres.structures.OreGraph.DwarfNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -94,7 +95,9 @@ public abstract class FindOre extends Goal {
 
         if (closestOre != null) {
             targetOre = closestOre;
-            List<BlockPos> path = AStar.findPath(world, pos, scanRadius);
+            EnvironmentScan env = new EnvironmentScan(world, pos, scanRadius);
+            DwarfTSP TSP = new DwarfTSP();
+            List<BlockPos> path = TSP.nearestNeighborTSP(env);
             if(path != null && !path.isEmpty()){
 
                 for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
@@ -204,15 +207,7 @@ public abstract class FindOre extends Goal {
         }
     }
 
-    public static void fixStuckDwarf(DwarfEntity dwarf){
-        targetOre = null;
-        dwarf.setPath(null);
-        activeGoal = null;
-    }
-
-    public static void breakTarget(DwarfEntity dwarf){
-        dwarf.getWorld().breakBlock(targetOre, true, dwarf);
-
+    public static void resetPath(DwarfEntity dwarf){
         targetOre = null;
         dwarf.setPath(null);
         activeGoal = null;

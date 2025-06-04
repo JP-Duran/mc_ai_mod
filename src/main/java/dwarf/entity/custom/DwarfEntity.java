@@ -42,7 +42,7 @@ public class DwarfEntity extends MerchantEntity {
     private List<BlockPos> currentPath = null;
     private int pathIndex = 0;
     private int jumpTimer = -1;
-    private int stuckTimer = 50;
+    private int stuckTimer = 5;
     double prevX = this.getX();
     double prevY = this.getY();
     double prevZ = this.getZ();
@@ -127,19 +127,19 @@ public class DwarfEntity extends MerchantEntity {
                     this.getWorld().setBlockState(supportPos, Blocks.COBBLESTONE.getDefaultState());
                 }
 
-                // Stuck detection, wiat 50 ticks, if position hasn't changed, clear path and find new one
+                // Stuck detection, wait 5 ticks, if position hasn't changed, clear path and find new one
                 if (this.getX() == prevX && this.getY() == prevY && this.getZ() == prevZ) {
                     stuckTimer--;
                     if (stuckTimer <= 0) {
                         System.out.println("Dwarf is stuck!");
-                        FindOre.fixStuckDwarf(this);
-                        stuckTimer = 50;
+                        FindOre.resetPath(this);
+                        stuckTimer = 5;
                     }
                 } else {
                     prevX = this.getX();
                     prevY = this.getY();
                     prevZ = this.getZ();
-                    stuckTimer = 50;
+                    stuckTimer = 5;
                 }
 
                 //Reached current path node
@@ -196,11 +196,10 @@ public class DwarfEntity extends MerchantEntity {
 
 
             }
-
-            // Reached end of path, call findore to break the ore and reset path
+            // Reached end of path, reset the path
             if (currentPath != null && pathIndex >= currentPath.size()) {
                 System.out.println("Completed path, resetting");
-                FindOre.breakTarget(this);
+                FindOre.resetPath(this);
             }
         }
     }
