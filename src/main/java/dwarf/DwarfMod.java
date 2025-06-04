@@ -1,12 +1,26 @@
 package dwarf;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import dwarf.entity.ModEntities;
 import dwarf.entity.custom.DwarfEntity;
 import dwarf.item.custom.ModItems;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.minecraft.server.command.ServerCommandSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+// word()
+import static com.mojang.brigadier.arguments.StringArgumentType.word;
+// literal("foo")
+import static net.minecraft.server.command.CommandManager.literal;
+// argument("bar", word())
+import static net.minecraft.server.command.CommandManager.argument;
+// Import everything in the CommandManager
+import static net.minecraft.server.command.CommandManager.*;
+
 
 public class DwarfMod implements ModInitializer {
 	public static final String MOD_ID = "dwarf_mod";
@@ -28,5 +42,14 @@ public class DwarfMod implements ModInitializer {
 
 		FabricDefaultAttributeRegistry.register(ModEntities.DWARF, DwarfEntity.createAttributes());
 		ModItems.registerModItems();
+		// UI code starting here
+		CommandRegistrationCallback.EVENT.register((dispatcher, commandRegistryAccess, registrationEnvironment) ->  dispatcher.register(literal("dwarf")
+				.then(argument("path", StringArgumentType.string())
+						.executes(commandContext -> dwarf(StringArgumentType.getString(commandContext, "path"))))));
+
+	}
+	public static int dwarf(String path, CommandContext<ServerCommandSource> context) {
+         //algorithms will be called here
+		if
 	}
 }
