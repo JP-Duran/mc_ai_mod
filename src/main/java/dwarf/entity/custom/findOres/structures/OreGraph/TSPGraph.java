@@ -5,6 +5,8 @@ import java.util.*;
 public class TSPGraph {
     // adjacency nested hash maps for weighted graph representation
     private Map<GraphNode, Map<GraphNode, Integer>> adjacencyMap;
+    // starting node for graph searches (dwarf location)
+    public GraphNode startNode;
 
     // graph constructor
     public TSPGraph() {

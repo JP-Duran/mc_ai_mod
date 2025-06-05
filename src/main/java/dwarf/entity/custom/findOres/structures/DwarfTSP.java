@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import static dwarf.entity.custom.findOres.EnvironmentScan.DIAMOND;
+import static dwarf.entity.custom.findOres.EnvironmentScan.DWARF;
 
 public class DwarfTSP {
 
@@ -22,9 +23,8 @@ public class DwarfTSP {
         ArrayList<GraphNode> nearestNeighborPath = nearestNeighbor(graph);
         // run A* between all nodes and generate final path
         ArrayList<BlockPos> path = new ArrayList<>();
-        DwarfNode current = env.getSpecificOreData(EnvironmentScan.DWARF).get(0);
-        System.out.println("nearest neighbor path size = " + nearestNeighborPath.size());
-        for (int i = 0; i < nearestNeighborPath.size(); i++) {
+        DwarfNode current = graph.startNode.ore;
+        for (int i = 1; i < nearestNeighborPath.size(); i++) {
             DwarfNode next = nearestNeighborPath.get(i).ore;
             path.addAll(AStar.findPath(env, current, next));
             env.resetEnvironmentNodes();
@@ -41,6 +41,8 @@ public class DwarfTSP {
         TSPGraph graph = new TSPGraph();
         // get the list DwarfNodes representing all diamond ores in the scanned environment
         List<DwarfNode> diamondLocs = env.getSpecificOreData(DIAMOND);
+        // get the DwarfNode representing the dwarf
+        DwarfNode dwarf = env.getSpecificOreData(DWARF).get(0);
         // insert all diamond ores into graph
         for (DwarfNode diamond : diamondLocs) {
             // create a GraphNode corresponding to the diamond ore
@@ -48,6 +50,10 @@ public class DwarfTSP {
             // insert the GraphNode into the TSPGraph
             graph.addNode(node);
         }
+        // insert dwarf into the graph
+        GraphNode dwarfNode = new GraphNode(dwarf);
+        graph.addNode(dwarfNode);
+        graph.startNode = dwarfNode;
         // get a list of all nodes in the graph
         ArrayList<GraphNode> nodeList = graph.getNodes();
         // calculate edge weights (manhattan dist) between all graph nodes and
@@ -56,7 +62,6 @@ public class DwarfTSP {
             for (int j = i + 1; j < nodeList.size(); j++) {
                 int edgeWeight = DwarfNode.manhattanDist(nodeList.get(i).ore, nodeList.get(j).ore);
                 graph.addEdge(nodeList.get(i), nodeList.get(j), edgeWeight);
-                System.out.println("Connecting " + i + " to " + j + " ");
             }
         }
         return graph;
@@ -65,8 +70,8 @@ public class DwarfTSP {
     public static ArrayList<GraphNode> nearestNeighbor(TSPGraph graph) {
         // initialize empty ArrayList
         ArrayList<GraphNode> path = new ArrayList<>();
-        // choose random node from graph for starting point
-        GraphNode startNode = graph.getNodes().get(0);
+        // choose dwarf node as starting point
+        GraphNode startNode = graph.startNode;
         GraphNode currentNode = startNode;
         // pick nearest neighbor (according to edge weight) until all nodes are visited
         while (true) {
