@@ -1,7 +1,7 @@
 package dwarf.entity.custom.findOres;
 
 import dwarf.entity.custom.DwarfEntity;
-import dwarf.entity.custom.findOres.structures.AStar;
+import dwarf.entity.custom.findOres.structures.BadStar;
 import dwarf.entity.custom.findOres.structures.OreGraph.DwarfNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -94,7 +94,9 @@ public abstract class FindOre extends Goal {
 
         if (closestOre != null) {
             targetOre = closestOre;
-            List<BlockPos> path = AStar.findPath(world, pos, scanRadius);
+            //List<BlockPos> path = AStar.findPath(world, pos, scanRadius);
+            //List<BlockPos> path = GreedyFloodFill.findPath(world, pos, scanRadius);
+            List<BlockPos> path = BadStar.findPath(world, pos, scanRadius);
             if(path != null && !path.isEmpty()){
 
                 for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
