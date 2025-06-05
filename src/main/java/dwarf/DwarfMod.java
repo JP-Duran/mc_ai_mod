@@ -50,6 +50,11 @@ public class DwarfMod implements ModInitializer {
 	}
 	public static int dwarf(String path, CommandContext<ServerCommandSource> context) {
          //algorithms will be called here
-		if
+        if (path.equals("astar")) {
+			//call astar algorithm here
+		} else if (path.equals("tsp")) {
+			//call tsp algorithm here
+		}
+		return 1;
 	}
 }
