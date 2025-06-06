@@ -4,7 +4,6 @@ import dwarf.entity.custom.findOres.EnvironmentScan;
 import dwarf.entity.custom.findOres.structures.OreGraph.DwarfNode;
 import dwarf.entity.custom.findOres.structures.OreGraph.DwarfPriorityQueue;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 import java.util.Collections;
 import java.util.ArrayList;
@@ -16,29 +15,27 @@ public class AStar {
         DwarfPriorityQueue queue = new DwarfPriorityQueue();
 
         // start and end nodes
-        DwarfNode startNode = start;
-        DwarfNode goalNode = end;
 
         System.out.println("Start node = ");
-        startNode.printNode();
+        start.printNode();
         System.out.println("Goal node = ");
-        goalNode.printNode();
+        end.printNode();
         // initialize startNode
-        startNode.gScore = 0;
-        startNode.fScore = DwarfNode.manhattanDist(startNode, goalNode);
+        start.gScore = 0;
+        start.fScore = DwarfNode.manhattanDist(start, end);
         // add start node to queue
-        queue.add(startNode);
+        queue.add(start);
 
         while (!queue.isEmpty()) {
             DwarfNode current = queue.poll();
-            if(DwarfNode.isEqual(current, goalNode)){
+            if(DwarfNode.isEqual(current, end)){
                 // Build and return the path
                 ArrayList<BlockPos> path = new ArrayList<>();
                 do {
                     System.out.println("Path node cost = " + current.type + "/" + current.extraCost);
                     path.add(env.getBlockPosFromArrayNode(current));
                     current = current.parent;
-                } while (current != startNode);
+                } while (current != start);
                 path.add(env.getBlockPosFromArrayNode(current));
                 Collections.reverse(path);
                 return path;
@@ -55,7 +52,7 @@ public class AStar {
                         // set parent
                         neighbor.parent = current;
                         neighbor.gScore = tempGScore;
-                        neighbor.fScore = neighbor.gScore + DwarfNode.manhattanDist(neighbor, goalNode);
+                        neighbor.fScore = neighbor.gScore + DwarfNode.manhattanDist(neighbor, end);
                     }
                     // add neighbor to priority queue if not already in it
                     if (queue.contains(neighbor)) {

@@ -19,7 +19,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.TradeOffer;
-import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.inventory.SimpleInventory;
@@ -68,7 +67,8 @@ public class DwarfEntity extends MerchantEntity {
     }
 
     @Override
-    protected void initGoals() { //wander lowest priority so when it cant find anything it does it, then diamonds, etc
+    protected void initGoals() {
+        //wander lowest priority so when it cant find anything it does it, then diamonds, etc
         //this.goalSelector.add(0, new WanderAroundFarGoal(this, 1.0D)); // UNCOMMENT TO ADD BACK WANDERING
         this.goalSelector.add(5, new FindDiamond(this));
     }
@@ -197,11 +197,7 @@ public class DwarfEntity extends MerchantEntity {
         this.pathIndex = 0;
     }
 
-    public List<BlockPos> getCurrentPath() {
-        return this.currentPath;
-    }
-
-    // Called when the player right clicks the dwarf
+    // Called when the player right-clicks the dwarf
     @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
         if (!this.getWorld().isClient()) {

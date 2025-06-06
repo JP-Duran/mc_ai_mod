@@ -1,14 +1,11 @@
 package dwarf.entity.custom.findOres.structures;
 
-import com.google.common.graph.Graph;
 import dwarf.entity.custom.findOres.EnvironmentScan;
 import dwarf.entity.custom.findOres.structures.OreGraph.DwarfNode;
 import dwarf.entity.custom.findOres.structures.OreGraph.GraphNode;
 import dwarf.entity.custom.findOres.structures.OreGraph.TSPGraph;
 import net.minecraft.util.math.BlockPos;
 
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +61,7 @@ public class DwarfTSP {
         // get the list DwarfNodes representing all diamond ores in the scanned environment
         List<DwarfNode> diamondLocs = env.getSpecificOreData(DIAMOND);
         // get the DwarfNode representing the dwarf
-        DwarfNode dwarf = env.getSpecificOreData(DWARF).get(0);
+        DwarfNode dwarf = env.getSpecificOreData(DWARF).getFirst();
         // insert all diamond ores into graph
         for (DwarfNode diamond : diamondLocs) {
             // create a GraphNode corresponding to the diamond ore
@@ -93,8 +90,7 @@ public class DwarfTSP {
         // initialize empty ArrayList
         ArrayList<GraphNode> path = new ArrayList<>();
         // choose dwarf node as starting point
-        GraphNode startNode = graph.startNode;
-        GraphNode currentNode = startNode;
+        GraphNode currentNode = graph.startNode;
         // pick nearest neighbor (according to edge weight) until all nodes are visited
         while (true) {
             Map<GraphNode, Integer> neighbors = graph.getNeighbors(currentNode);
@@ -121,7 +117,6 @@ public class DwarfTSP {
     public static ArrayList<GraphNode> twoOpt(TSPGraph graph) {
         // run nearestNeighbor on graph for initial tour path
         ArrayList<GraphNode> path = nearestNeighbor(graph);
-        int pathCost = tourCost(graph, path);
         // if path length is < 4 two-opt cannot help
         // in this case nearestNeighbor is optimal path
         if (path.size() < 4) {
@@ -130,7 +125,6 @@ public class DwarfTSP {
         int numNodes = path.size();
         // search for edges to swap until local minimum is reached
         while (true) {
-            int currentCost = tourCost(graph, path);
             int minChange = 0;
             int iOpt = 0;
             int jOpt = 0;
@@ -163,15 +157,6 @@ public class DwarfTSP {
                 return path;
             }
         }
-    }
-
-    // calculates the total tour cost given a TSPGraph and a list of graphNodes
-    public static int tourCost(TSPGraph graph, ArrayList<GraphNode> tour) {
-        int tourCost = 0;
-        for (int i = 0; i < tour.size() - 1; i++) {
-            tourCost += graph.getEdgeWeight(tour.get(i), tour.get(i + 1));
-        }
-        return tourCost;
     }
 
     // resets all nodes in a TSP graph to unvisited

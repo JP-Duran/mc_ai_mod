@@ -1,6 +1,5 @@
 package dwarf;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dwarf.entity.ModEntities;
@@ -13,16 +12,12 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 // word()
-import static com.mojang.brigadier.arguments.StringArgumentType.word;
 // literal("foo")
 import static net.minecraft.server.command.CommandManager.literal;
 // argument("bar", word())
 import static net.minecraft.server.command.CommandManager.argument;
 // Import everything in the CommandManager
-import static net.minecraft.server.command.CommandManager.*;
-
 
 
 public class DwarfMod implements ModInitializer {
