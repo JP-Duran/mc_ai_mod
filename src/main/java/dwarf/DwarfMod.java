@@ -24,7 +24,9 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.*;
 
 
+
 public class DwarfMod implements ModInitializer {
+
 	public static final String MOD_ID = "dwarf_mod";
 
 	// This logger is used to write text to the console and the log file.
@@ -32,6 +34,15 @@ public class DwarfMod implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	// global variable for choosing algorithm
+	public static int a_flag = 0;
+
+	public static void a_star() {
+		a_flag = 1;
+	}
+	public static void  tsp() {
+		a_flag = 2;
+	}
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -53,11 +64,14 @@ public class DwarfMod implements ModInitializer {
 	public static int executeDwarf(String path, CommandContext<ServerCommandSource> context) {
 		//algorithms will be called here
 		if (path.equals("astar")) {
-			context.getSource().sendFeedback(() -> Text.literal("Running AStar on dwarf"), false);
+			a_star();
+			context.getSource().sendFeedback(() -> Text.literal("Running AStar on dwarf. Flag Value is %s".formatted(a_flag)), false);
+
 			//call astar algorithm here
 		}
 		if (path.equals("tsp")) {
-			context.getSource().sendFeedback(() -> Text.literal("Running TSP on dwarf"), false);
+            tsp();
+			context.getSource().sendFeedback(() -> Text.literal("Running TSP on dwarf. Flag Value is %s".formatted(a_flag)), false);
 
 			//call tsp algorithm here
 		}
