@@ -35,12 +35,12 @@ public class DwarfMod implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	// global variable for choosing algorithm
-	public static int a_flag = 0;
+	public static int a_flag = 1;
 
-	public static void a_star() {
+	public static void nearest_neighbor() {
 		a_flag = 1;
 	}
-	public static void  tsp() {
+	public static void  two_opt() {
 		a_flag = 2;
 	}
 	@Override
@@ -63,15 +63,15 @@ public class DwarfMod implements ModInitializer {
 	//this code actually performs the command actions
 	public static int executeDwarf(String path, CommandContext<ServerCommandSource> context) {
 		//algorithms will be called here
-		if (path.equals("astar")) {
-			a_star();
-			context.getSource().sendFeedback(() -> Text.literal("Running AStar on dwarf. Flag Value is %s".formatted(a_flag)), false);
+		if (path.equals("nearestneighbor")) {
+			nearest_neighbor();
+			context.getSource().sendFeedback(() -> Text.literal("Using Nearest Neighbor TSP Algorithm. Flag Value is %s".formatted(a_flag)), false);
 
 			//call astar algorithm here
 		}
-		if (path.equals("tsp")) {
-            tsp();
-			context.getSource().sendFeedback(() -> Text.literal("Running TSP on dwarf. Flag Value is %s".formatted(a_flag)), false);
+		if (path.equals("2opt")) {
+            two_opt();
+			context.getSource().sendFeedback(() -> Text.literal("Using 2-opt TSP Optimization. Flag Value is %s".formatted(a_flag)), false);
 
 			//call tsp algorithm here
 		}

@@ -1,5 +1,6 @@
 package dwarf.entity.custom.findOres;
 
+import dwarf.DwarfMod;
 import dwarf.entity.custom.DwarfEntity;
 import dwarf.entity.custom.findOres.structures.DwarfTSP;
 import net.minecraft.block.Block;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public abstract class FindOre extends Goal {
     protected final DwarfEntity dwarf;
-    protected static final int scanRadius = 10;
+    protected static final int scanRadius = 25;
     protected static BlockPos targetOre = null;
     protected static final int torchLightLevel = 5;
 
@@ -51,9 +52,29 @@ public abstract class FindOre extends Goal {
         if (closestOre != null) {
             targetOre = closestOre;
             EnvironmentScan env = new EnvironmentScan(world, pos, scanRadius);
-            DwarfTSP TSP = new DwarfTSP();
-            List<BlockPos> path = TSP.nearestNeighborTSP(env);
+            List<BlockPos> path = null;
+            List <BlockPos> pathAlt = null;
+            switch (DwarfMod.a_flag) {
+                case 1:
+                    for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
+                        player.sendMessage(Text.literal("Main algorithm = nearest neighbor"), false);
+                    }
+                    path = DwarfTSP.nearestNeighborTSP(env);
+                    pathAlt = DwarfTSP.twoOptTSP(env);
+                    break;
+                case 2:
+                    for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
+                        player.sendMessage(Text.literal("Main algorithm = 2-opt"), false);
+                    }
+                    path = DwarfTSP.twoOptTSP(env);
+                    pathAlt = DwarfTSP.nearestNeighborTSP(env);
+                    break;
+            }
             if (path != null && !path.isEmpty()) {
+                for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
+                    player.sendMessage(Text.literal("Main   alg path length = " + path.size()), false);
+                    player.sendMessage(Text.literal("Other alg path length = " + pathAlt.size()), false);
+                }
                 dwarf.setPath(path);
             } else{
                 targetOre = null;
