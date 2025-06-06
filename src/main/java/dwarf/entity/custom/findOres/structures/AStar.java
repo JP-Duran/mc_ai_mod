@@ -35,6 +35,7 @@ public class AStar {
                 // Build and return the path
                 ArrayList<BlockPos> path = new ArrayList<>();
                 do {
+                    System.out.println("Path node cost = " + current.type + "/" + current.extraCost);
                     path.add(env.getBlockPosFromArrayNode(current));
                     current = current.parent;
                 } while (current != startNode);

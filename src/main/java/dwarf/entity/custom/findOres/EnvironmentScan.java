@@ -179,10 +179,14 @@ public class EnvironmentScan {
 
                 // Check for air below the current block
                 // We can also add checks for blocks that have lava above them or something
-                if (blockId == AIR && arrayY > 0) {
+                if (arrayY > 0) {
                     DwarfNode below = blockData[arrayX][arrayY - 1][arrayZ];
                     if (below.type == AIR) {
-                        block.extraCost += 1;
+                        if (below.extraCost == 0) {
+                            block.extraCost = 5;
+                        } else {
+                            block.extraCost += below.extraCost + 5;
+                        }
                     }
                 }
 
@@ -273,7 +277,6 @@ public class EnvironmentScan {
                     node.fScore = Integer.MAX_VALUE;
                     node.gScore = Integer.MAX_VALUE;
                     node.parent = null;
-                    node.extraCost = 0;
                 }
             }
         }
@@ -310,12 +313,12 @@ public class EnvironmentScan {
     // dwarf identifier value
     final public static int DWARF = 100;
     // block identifier values
-    final public static int DEFAULT = 5;
+    final public static int DEFAULT = 25;
     // TODO SHOULD THIS BE 1? TO MAKE HEURISTIC ADMISSIBLE
-    final public static int AIR = 0;
-    final public static int DIRT = 1;
-    final public static int STONE = 2;
-    final public static int COBBLESTONE = 2; // Same as STONE
+    final public static int AIR = 1;
+    final public static int DIRT = 5;
+    final public static int STONE = 15;
+    final public static int COBBLESTONE = 15; // Same as STONE
     final public static int DIAMOND = 99;
     final public static int GOLD = 98;
     final public static int EMERALD = 97;
