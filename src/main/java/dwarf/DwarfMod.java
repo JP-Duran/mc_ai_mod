@@ -1,5 +1,6 @@
 package dwarf;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dwarf.entity.ModEntities;
@@ -9,6 +10,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
@@ -42,19 +44,27 @@ public class DwarfMod implements ModInitializer {
 
 		FabricDefaultAttributeRegistry.register(ModEntities.DWARF, DwarfEntity.createAttributes());
 		ModItems.registerModItems();
-		// UI code starting here
-		CommandRegistrationCallback.EVENT.register((dispatcher, commandRegistryAccess, registrationEnvironment) ->  dispatcher.register(literal("dwarf")
+		// UI code starting here this is registering the dwarf command
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(literal("dwarf")
 				.then(argument("path", StringArgumentType.string())
-						.executes(commandContext -> dwarf(StringArgumentType.getString(commandContext, "path"))))));
-
+						.executes(context -> executeDwarf(StringArgumentType.getString(context, "path"), context)))));
 	}
-	public static int dwarf(String path, CommandContext<ServerCommandSource> context) {
-         //algorithms will be called here
-        if (path.equals("astar")) {
+	//this code actually performs the command actions
+	public static int executeDwarf(String path, CommandContext<ServerCommandSource> context) {
+		//algorithms will be called here
+		if (path.equals("astar")) {
+			context.getSource().sendFeedback(() -> Text.literal("Running AStar on dwarf"), false);
 			//call astar algorithm here
-		} else if (path.equals("tsp")) {
+		}
+		if (path.equals("tsp")) {
+			context.getSource().sendFeedback(() -> Text.literal("Running TSP on dwarf"), false);
+
 			//call tsp algorithm here
 		}
+
+
 		return 1;
 	}
+
 }
+
