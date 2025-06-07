@@ -52,12 +52,13 @@ public class BadStar {
             for (DwarfNode neighbor : current.neighbors) {
                 if (!neighbor.visited) {
                     // Make straight movement more expensive than turning (encourage zig-zag)
-                    int tempGScore = current.gScore + 10 + (int)(Math.random() * 5); // random penalty
+                    int tempGScore = current.gScore + 9999 - DwarfNode.manhattanDist(neighbor, goalNode);
 
                     // Penalize nodes that align with the goal's x or z direction (avoid straight lines)
                     if (neighbor.X == goalNode.X || neighbor.Z == goalNode.Z) {
-                        tempGScore += 20;
+                        tempGScore += 200;
                     }
+                    System.out.println("tempGScore: " + tempGScore);
 
                     if (tempGScore < neighbor.gScore) {
                         neighbor.parent = current;
