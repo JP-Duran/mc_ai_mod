@@ -10,6 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AStar {
+    /**
+     * Uses 3-dimensional A* pathfinding to find a path within 'env' from 'start' to 'end'
+     * This path will be returned as a List of BlockPos, which is in real-world coordinates and is
+     * not dependent on any custom environment indexing
+     */
     public static List<BlockPos> findPath(EnvironmentScan env, DwarfNode start, DwarfNode end) {
         // create a priority queue
         DwarfPriorityQueue queue = new DwarfPriorityQueue();
@@ -32,7 +37,7 @@ public class AStar {
                 // Build and return the path
                 ArrayList<BlockPos> path = new ArrayList<>();
                 do {
-                    System.out.println("Path node cost = " + current.type + "/" + current.extraCost);
+                    //System.out.println("Path node cost = " + current.type + "/" + current.extraCost);
                     path.add(env.getBlockPosFromArrayNode(current));
                     current = current.parent;
                 } while (current != start);

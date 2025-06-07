@@ -22,8 +22,12 @@ public class EnvironmentScan {
     // 3d array holding environment scan
     public DwarfNode[][][] blockData;
 
+    // hashmap holding ore locations in blockData
     public HashMap<Integer, ArrayList<DwarfNode>> oreData;
 
+    /**
+     * EnvironmentScan constructor
+     */
     public EnvironmentScan(World world, BlockPos centerPos, int scanRadius) {
         // initialize vars
         // general variables for env scan
@@ -144,7 +148,8 @@ public class EnvironmentScan {
                 blockData[arrayX][arrayY][arrayZ] = block;
 
                 // Check for air below the current block
-                // We can also add checks for blocks that have lava above them or something
+                // This logic helps ensure the dwarf displays 'desirable' behavior in pathfinding (such that it does
+                // not overuse towering in its pathing)
                 if (arrayY > 0) {
                     DwarfNode below = blockData[arrayX][arrayY - 1][arrayZ];
                     if (below.type == AIR) {
@@ -170,7 +175,6 @@ public class EnvironmentScan {
             }
         }
         // calculate dwarfs position (always in center of arr)
-        // helper vars
         int centerIndexX = centerPos.getX() - worldOriginX;
         int centerIndexY = centerPos.getY() - worldOriginY;
         int centerIndexZ = centerPos.getZ() - worldOriginZ;
@@ -181,7 +185,7 @@ public class EnvironmentScan {
     }
 
     /**
-     * calculates all neighbors for the DwarfNodes in blockData
+     * calculates all neighbors for the DwarfNodes in blockData -- this is essential for the A* algorithm
      */
     public void calculateBlockNeighbors() {
         // array dimensions
@@ -226,6 +230,17 @@ public class EnvironmentScan {
         return new BlockPos(worldX, worldY, worldZ);
     }
 
+    /**
+     * returns a list of DwarfNodes representing all the specified oreType within the environment scan
+     */
+    public List<DwarfNode> getSpecificOreData(int oreType) {
+        return oreData.getOrDefault(oreType, null);
+    }
+
+    /**
+     * resets the members in a DwarfNode that are modified within A* -- this must be called on the EnvironmentScan
+     * between each function call of A*
+     */
     public void resetEnvironmentNodes() {
         // array dimensions
         int size = (2 * scanRadius) + 1;
@@ -248,7 +263,6 @@ public class EnvironmentScan {
     final public static int DWARF = 100;
     // block identifier values
     final public static int DEFAULT = 25;
-    // TODO SHOULD THIS BE 1? TO MAKE HEURISTIC ADMISSIBLE
     final public static int AIR = 1;
     final public static int DIRT = 5;
     final public static int STONE = 15;
@@ -267,8 +281,4 @@ public class EnvironmentScan {
     final public static int GLASS = 1000;
     final public static int OOB = 999;
 
-    // returns specified ore's coordinate list, or null if none
-    public List<DwarfNode> getSpecificOreData(int oreType) {
-        return oreData.getOrDefault(oreType, null);
-    }
 }
