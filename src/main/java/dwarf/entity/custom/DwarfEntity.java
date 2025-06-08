@@ -22,6 +22,8 @@ import net.minecraft.village.TradeOffer;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.entity.ai.goal.Goal;
+
 
 import java.util.List;
 import java.util.Set;
@@ -37,6 +39,8 @@ public class DwarfEntity extends MerchantEntity {
     double prevX = this.getX();
     double prevY = this.getY();
     double prevZ = this.getZ();
+
+    boolean hasComputedPath = false;
 
     //List of items it will try to pickup, add new items here if you want to add/remove one
     private static final Set<Item> pickUpItemsList = Set.of(
@@ -91,6 +95,12 @@ public class DwarfEntity extends MerchantEntity {
 
             // Path Following Logic
             if (currentPath != null && pathIndex < currentPath.size()) {
+
+                if (!this.hasComputedPath) {
+                    this.hasComputedPath = true;
+                    System.out.println("Dwarf finished computing path!");
+                }
+
                 BlockPos target = currentPath.get(pathIndex);
                 Vec3d targetCenter = new Vec3d(target.getX() + 0.5, target.getY(), target.getZ() + 0.5);
                 double dx = targetCenter.x - this.getX();
@@ -186,7 +196,7 @@ public class DwarfEntity extends MerchantEntity {
 
     public static DefaultAttributeContainer.Builder createAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.MAX_HEALTH, 18)
+                .add(EntityAttributes.MAX_HEALTH, 500)
                 .add(EntityAttributes.MOVEMENT_SPEED, 0.35)
                 .add(EntityAttributes.ATTACK_DAMAGE, 1);
     }
@@ -195,6 +205,7 @@ public class DwarfEntity extends MerchantEntity {
         System.out.println("Setting path inside DwarfEntity");
         this.currentPath = path;
         this.pathIndex = 0;
+        this.hasComputedPath = false;
     }
 
     // Called when the player right-clicks the dwarf

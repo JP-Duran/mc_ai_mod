@@ -47,8 +47,6 @@ public abstract class FindOre extends Goal {
         World world = dwarf.getWorld();
         BlockPos closestOre = scanForOres();
 
-        System.out.println("Inside start");
-
         if (closestOre != null) {
             targetOre = closestOre;
             EnvironmentScan env = new EnvironmentScan(world, pos, scanRadius);

@@ -1,21 +1,29 @@
 package dwarf;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dwarf.entity.ModEntities;
 import dwarf.entity.custom.DwarfEntity;
+import dwarf.entity.custom.DwarfEvaluationManager;
+import dwarf.entity.custom.EvaluationTask;
 import dwarf.item.custom.ModItems;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-// word()
-// literal("foo")
+
+import java.util.EnumSet;
+
 import static net.minecraft.server.command.CommandManager.literal;
-// argument("bar", word())
 import static net.minecraft.server.command.CommandManager.argument;
 // Import everything in the CommandManager
 
@@ -50,27 +58,57 @@ public class DwarfMod implements ModInitializer {
 
 		FabricDefaultAttributeRegistry.register(ModEntities.DWARF, DwarfEntity.createAttributes());
 		ModItems.registerModItems();
+
+		// Register a tick handler for the dwarf evaluation tasks
+		ServerTickEvents.END_WORLD_TICK.register(world -> {
+			if (world instanceof ServerWorld serverWorld) {
+				DwarfEvaluationManager.tick();
+			}
+		});
+
 		// UI code starting here this is registering the dwarf command
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(literal("dwarf")
-				.then(argument("path", StringArgumentType.string())
-						.executes(context -> executeDwarf(StringArgumentType.getString(context, "path"), context)))));
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+				dispatcher.register(literal("dwarf")
+						.then(argument("path", StringArgumentType.string())
+								.executes(context -> executeDwarf(StringArgumentType.getString(context, "path"), context)))
+
+						// /dwarf evaluate <iterations>
+						.then(literal("evaluate")
+								.then(argument("iterations", IntegerArgumentType.integer(1)) // Ensure there is at least one iteration
+										.executes(context -> {
+											// Get number of iterations from input
+											int iterations = IntegerArgumentType.getInteger(context, "iterations");
+
+											// Get the world and player
+											ServerWorld world = context.getSource().getWorld();
+											ServerPlayerEntity player = context.getSource().getPlayer();
+
+											// Queue evaluation tasks with random positions
+											for (int i = 0; i < iterations; i++) {
+												BlockPos pos = EvaluationTask.getRandCoordinates();
+												DwarfEvaluationManager.addTask(new EvaluationTask(pos, player, world));
+											}
+											context.getSource().sendFeedback(() ->
+													Text.literal("Evaluating Dwarf " + iterations + " times"), false);
+											return 1;
+										})
+								)
+						)
+				)
+		);
+
 	}
-	//this code actually performs the command actions
+	// This code actually performs the command actions
 	public static int executeDwarf(String path, CommandContext<ServerCommandSource> context) {
-		//algorithms will be called here
+		// Algorithms will be called here
 		if (path.equals("nearestneighbor")) {
 			nearest_neighbor();
 			context.getSource().sendFeedback(() -> Text.literal("Using Nearest Neighbor TSP Algorithm. Flag Value is %s".formatted(a_flag)), false);
-
-			//call astar algorithm here
 		}
 		if (path.equals("2opt")) {
             two_opt();
 			context.getSource().sendFeedback(() -> Text.literal("Using 2-opt TSP Optimization. Flag Value is %s".formatted(a_flag)), false);
-
-			//call tsp algorithm here
 		}
-
 
 		return 1;
 	}
