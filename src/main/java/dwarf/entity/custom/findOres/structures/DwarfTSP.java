@@ -15,6 +15,11 @@ import static dwarf.entity.custom.findOres.EnvironmentScan.DWARF;
 
 public class DwarfTSP {
 
+    /**
+     * uses the nearest neighbor heuristic to construct an efficient tour between all the diamond ore in 'env'
+     * this tour is returned as a List of BlockPos which contain real-world coordinates and do not
+     * depend on any custom indexing
+     */
     public static List<BlockPos> nearestNeighborTSP(EnvironmentScan env) {
         // generate TSP graph
         TSPGraph graph = generateTSPGraph(env);
@@ -29,12 +34,19 @@ public class DwarfTSP {
             env.resetEnvironmentNodes();
             current = next;
         }
+        /*
         for (BlockPos pos : path) {
             System.out.println("( " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + " )");
         }
+        */
         return path;
     }
 
+    /**
+     * uses the nearest neighbor heuristic with 2-optimization to construct an efficient tour between all the diamond ore in 'env'
+     * this tour is returned as a List of BlockPos which contain real-world coordinates and do not
+     * depend on any custom indexing
+     */
     public static List<BlockPos> twoOptTSP(EnvironmentScan env) {
         // generate TSP graph
         TSPGraph graph = generateTSPGraph(env);
@@ -49,12 +61,18 @@ public class DwarfTSP {
             env.resetEnvironmentNodes();
             current = next;
         }
+        /*
         for (BlockPos pos : path) {
             System.out.println("( " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + " )");
         }
+        */
         return path;
     }
 
+    /**
+     * generates a complete weighted graph of GraphNodes given an environment
+     * the nodes are the diamond ores in the env, and the weights are manhattan distances between the ores
+     */
     public static TSPGraph generateTSPGraph(EnvironmentScan env) {
         // initialize TSPGraph object
         TSPGraph graph = new TSPGraph();
@@ -86,6 +104,10 @@ public class DwarfTSP {
         return graph;
     }
 
+    /**
+     * uses the nearest neighbor heuristic to generate a tour of a weighted graph
+     * helper function for nearestNeighborTSP()
+     */
     public static ArrayList<GraphNode> nearestNeighbor(TSPGraph graph) {
         // initialize empty ArrayList
         ArrayList<GraphNode> path = new ArrayList<>();
@@ -114,6 +136,10 @@ public class DwarfTSP {
         }
     }
 
+    /**
+     * uses the 2-optimization technique on a nearest-neighbor generated tour to optimize a tour of a weighted graph
+     * helper function for twoOptTSP()
+     */
     public static ArrayList<GraphNode> twoOpt(TSPGraph graph) {
         // run nearestNeighbor on graph for initial tour path
         ArrayList<GraphNode> path = nearestNeighbor(graph);
@@ -128,16 +154,20 @@ public class DwarfTSP {
             int minChange = 0;
             int iOpt = 0;
             int jOpt = 0;
+            // for all sets of two edges in the graph
             for (int i = 0; i < numNodes - 3; i++) {
                 for (int j = i + 2; j < numNodes - 1; j++) {
                     GraphNode i1 = path.get(i);
                     GraphNode i2 = path.get(i + 1);
                     GraphNode j1 = path.get(j);
                     GraphNode j2 = path.get(j + 1);
-                    System.out.println("Considering (" + i + ", " + (i+1) + "), (" + j + ", " + (j+1) + ")");
+                    //System.out.println("Considering (" + i + ", " + (i+1) + "), (" + j + ", " + (j+1) + ")");
+                    // calculate the difference if the edges are swapped according to 2-opt
                     int diff = graph.getEdgeWeight(i1, j1) + graph.getEdgeWeight(i2, j2) -
                             graph.getEdgeWeight(i1, i2) - graph.getEdgeWeight(j1, j2);
-                    System.out.println("Diff = " + diff);
+                    //System.out.println("Diff = " + diff);
+                    // the more negative 'diff' is, the better the resulting tour will be
+                    // minChange, iOpt, and jOpt keep track of the best current swap found
                     if (diff < minChange) {
                         minChange = diff;
                         iOpt = i;
@@ -145,21 +175,23 @@ public class DwarfTSP {
                     }
                 }
             }
+            // if an optimization was found, apply it to the graph
             if (minChange < 0) {
-                ArrayList<GraphNode> newPath = (ArrayList<GraphNode>) path.clone();
-                GraphNode tempJ = newPath.get(jOpt);
-                newPath.set(jOpt, newPath.get(iOpt + 1));
-                newPath.set(iOpt + 1, tempJ);
+                GraphNode tempJ = path.get(jOpt);
+                path.set(jOpt, path.get(iOpt + 1));
+                path.set(iOpt + 1, tempJ);
                 System.out.println("Swapping (" + iOpt + ", " + (iOpt+1) + "), (" + jOpt + ", " + (jOpt+1)
-                + ") with (" + iOpt + ", " + jOpt + "), (" + (iOpt+1) + ", " + (jOpt+1) + ")");
-                path = newPath;
+                + ") with (" + iOpt + ", " + jOpt + "), (" + (iOpt+1) + ", " + (jOpt+1) + ") improvement = " + minChange);
+            // if graph was examined and no optimization was found, 2-opt is finished
             } else {
                 return path;
             }
         }
     }
 
-    // resets all nodes in a TSP graph to unvisited
+    /**
+     * resets all nodes in a TSPGraph to unvisited
+     */
     public static void resetGraphVisited(TSPGraph graph) {
         ArrayList<GraphNode> nodes = graph.getNodes();
         for (GraphNode node : nodes) {
