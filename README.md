@@ -15,4 +15,6 @@ Import the project into IntelliJ, let Gradle sync, and download any dependencies
 
 **NOTE**: Make sure you do all the quick fix class-path imports in IntelliJ IDEA if you're running into missing package errors -- it seems like this is a required step  
 
-[This video](https://www.youtube.com/watch?v=rQdXWM8Ud90&t=1146s) is what some of the code is based off of. It will give you a good idea of what each file is doing. However, I had to change a lot of small things for the newer versions of Minecraft/Fabric, so it wont match 1:1
+[This video](https://www.youtube.com/watch?v=rQdXWM8Ud90&t=1146s) is what some of the code is based off of. It will give you a good idea of what each file is doing. However, I had to change a lot of small things for the newer versions of Minecraft/Fabric, so it wont match 1:1. That video lists the tutorial github we based the initial code off of: https://github.com/Tutorials-By-Kaupenjoe/Fabric-Tutorial-1.21.X/tree/39-customMob
+
+Created for CSC 480: Artificial Intelligence – California Polytechnic State University, Spring 2025 with Proffesor Rodrigo Canaan.
