@@ -18,3 +18,4 @@ Import the project into IntelliJ, let Gradle sync, and download any dependencies
 [This video](https://www.youtube.com/watch?v=rQdXWM8Ud90&t=1146s) is what some of the code is based off of. It will give you a good idea of what each file is doing. However, I had to change a lot of small things for the newer versions of Minecraft/Fabric, so it wont match 1:1. That video lists the tutorial github we based the initial code off of: https://github.com/Tutorials-By-Kaupenjoe/Fabric-Tutorial-1.21.X/tree/39-customMob
 
 Created for CSC 480: Artificial Intelligence – California Polytechnic State University, Spring 2025 with Proffesor Rodrigo Canaan.
+Team Members: Katie Hallinan, Colby Watts, Grant Robinson, Jackson Nelson, Julian Duran
