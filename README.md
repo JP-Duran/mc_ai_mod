@@ -24,7 +24,7 @@ Import the project into IntelliJ, let Gradle sync, and download any dependencies
 #### Commands
 `/dwarf nearestneighbor` - set the TSP algorithm to nearest neighbor  
 `/dwarf 2op` - set the TSP algorithm to 2-opt  
-`/dwarf evaluate <iterations>` - test the pathing lengths of the different algorithms <iterations> times
+`/dwarf evaluate <iterations>` - test the pathing lengths of the different algorithms the input number of times
 
 **NOTE:** The dwarf will use a custom 3-dimensional A* pathfinding algorithm regardless of the TSP algorithm that is selected
 
