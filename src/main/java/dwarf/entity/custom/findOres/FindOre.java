@@ -3,6 +3,7 @@ package dwarf.entity.custom.findOres;
 import dwarf.DwarfMod;
 import dwarf.entity.custom.DwarfEntity;
 import dwarf.entity.custom.findOres.structures.DwarfTSP;
+import dwarf.entity.custom.findOres.structures.GreedyFloodFill;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.Goal;
@@ -66,6 +67,13 @@ public abstract class FindOre extends Goal {
                     }
                     path = DwarfTSP.twoOptTSP(env);
                     pathAlt = DwarfTSP.nearestNeighborTSP(env);
+                    break;
+                case 3:
+                    for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
+                        player.sendMessage(Text.literal("Main algorithm = Greedy Flood Fill"), false);
+                    }
+                    path = GreedyFloodFill.findPath(world, pos, scanRadius);
+                    pathAlt = GreedyFloodFill.findPath(world, pos, scanRadius);
                     break;
             }
             if (path != null && !path.isEmpty()) {
