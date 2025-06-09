@@ -12,6 +12,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 public abstract class FindOre extends Goal {
@@ -82,6 +85,7 @@ public abstract class FindOre extends Goal {
                     player.sendMessage(Text.literal("Other alg path length = " + pathAlt.size()), false);
                 }
                 dwarf.setPath(path);
+                WriteToCsv(path.size(), pathAlt.size());
             } else{
                 targetOre = null;
                 activeGoal = null;
@@ -135,6 +139,17 @@ public abstract class FindOre extends Goal {
             activeGoal = null;
         }
         targetOre = null;
+    }
+
+    // Writes the path lengths to a CSV file located at run/path_length.csv
+    public void WriteToCsv(int pathLength, int altPathLength){
+        String file_path = "path_length.csv";
+
+        try(PrintWriter writer = new PrintWriter(new FileWriter(file_path, true))){
+            writer.println(pathLength + "," + altPathLength);
+        } catch(IOException e){
+            System.err.println("Failed to write to CSV: " + e.getMessage());
+        }
     }
 
 
