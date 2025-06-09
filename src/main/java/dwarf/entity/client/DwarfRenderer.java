@@ -24,31 +24,6 @@ public class DwarfRenderer extends MobEntityRenderer<DwarfEntity, DwarfRenderSta
     }
 
     @Override
-    public void updateRenderState(DwarfEntity entity, DwarfRenderState state, float tickDelta) {
-        super.updateRenderState(entity, state, tickDelta);
-
-
-        // Transfer animation states from entity to render state
-        if (entity.idleAnimationState.isRunning()) {
-            state.idle.start(entity.age);
-        } else {
-            state.idle.stop();
-        }
-
-        if (entity.walkAnimationState.isRunning()) {
-            state.walk.start(entity.age);
-        } else {
-            state.walk.stop();
-        }
-
-        if (entity.runAnimationState.isRunning()) {
-            state.run.start(entity.age);
-        } else {
-            state.run.stop();
-        }
-    }
-
-    @Override
     public Identifier getTexture(DwarfRenderState state) {
         return Identifier.of(DwarfMod.MOD_ID, "textures/entity/dwarf/dwarftexture.png");
     }

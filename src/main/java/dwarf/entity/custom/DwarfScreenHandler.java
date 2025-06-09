@@ -1,11 +1,9 @@
 package dwarf.entity.custom;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.ScreenHandler;
 
 public class DwarfScreenHandler extends GenericContainerScreenHandler {
 

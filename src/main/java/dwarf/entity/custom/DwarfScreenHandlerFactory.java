@@ -5,7 +5,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
 
 public class DwarfScreenHandlerFactory implements NamedScreenHandlerFactory {
     private final DwarfEntity dwarf;
