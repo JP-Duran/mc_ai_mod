@@ -12,7 +12,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -21,10 +20,8 @@ import net.minecraft.util.math.BlockPos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.EnumSet;
-
-import static net.minecraft.server.command.CommandManager.literal;
 import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 // Import everything in the CommandManager
 
 
@@ -46,6 +43,10 @@ public class DwarfMod implements ModInitializer {
 	public static void  two_opt() {
 		a_flag = 2;
 	}
+	public static void  greedy_flood_fill() {
+		a_flag = 3;
+	}
+
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -108,6 +109,10 @@ public class DwarfMod implements ModInitializer {
 		if (path.equals("2opt")) {
             two_opt();
 			context.getSource().sendFeedback(() -> Text.literal("Using 2-opt TSP Optimization. Flag Value is %s".formatted(a_flag)), false);
+		}
+		if (path.equals("greedyfloodfill")) {
+			greedy_flood_fill();
+			context.getSource().sendFeedback(() -> Text.literal("Using Greedy Flood Fill. Flag Value is %s".formatted(a_flag)), false);
 		}
 
 		return 1;
