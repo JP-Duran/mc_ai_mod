@@ -1,4 +1,4 @@
-# Cal Poly SLO CSC 480 Minecraft Mob Project
+# Cal Poly SLO CSC 480 Spring 2025 Minecraft Mob Project
 ### Professor: *Dr. Rodrigo Canaan*
 ### Students: *Julian Duran, Colby Watts, Katelyn Hallinan, Jackson Nelson, Grant Robinson*
 ### Credits: *Fabric Minecraft modding API, BlockBench*
@@ -24,6 +24,7 @@ Import the project into IntelliJ, let Gradle sync, and download any dependencies
 #### Commands
 `/dwarf nearestneighbor` - set the TSP algorithm to nearest neighbor  
 `/dwarf 2op` - set the TSP algorithm to 2-opt  
+`/dwarf greedyfloodfill` - set the pathfinding algorithm to Greedy Flood Fill (does not use TSP -- only paths to nearest ore)
 `/dwarf evaluate <iterations>` - test the pathing lengths of the different algorithms the input number of times
 
 **NOTE:** The dwarf will use a custom 3-dimensional A* pathfinding algorithm regardless of the TSP algorithm that is selected
