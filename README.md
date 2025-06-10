@@ -36,6 +36,9 @@ To run the Minecraft game with our Dwarf mod, simply click the 'Run' button in I
 #### Testing  
 To recreate the Evaluation scenario that we used in our report, create a new minecraft world (regular terrain generation). Then simply run `/dwarf evaluate 500`. The results will be printed to the game chat as well as saved to a csv file.
 
+![image](https://github.com/user-attachments/assets/0def8a49-8666-41a4-b2f5-1050828d7e92)
+![image](https://github.com/user-attachments/assets/196d61fc-11fc-4807-b717-27c6b09a46fe)
+
 #### Spawning
 The dwarf can be spawned from a spawn egg. In creative mode, the required item will appear in the 'Spawn Eggs' section of
 the item search. The player then simply uses the spawn egg and the dwarf will appear. If there are any diamond ores present within
