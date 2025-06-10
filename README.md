@@ -2,6 +2,7 @@
 ### Professor: *Dr. Rodrigo Canaan*
 ### Students: *Julian Duran, Colby Watts, Katelyn Hallinan, Jackson Nelson, Grant Robinson*
 ### Credits: *Fabric Minecraft modding API, BlockBench*
+              *Based Code modified  github repo: https://github.com/Tutorials-By-Kaupenjoe/Fabric-Tutorial-1.21.X*
 
 ### Setup
 
