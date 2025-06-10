@@ -22,13 +22,19 @@ Import the project into IntelliJ, let Gradle sync, and download any dependencies
 
 ### Usage Instructions
 
+#### Running the Game with the Mod  
+To run the Minecraft game with our Dwarf mod, simply click the 'Run' button in IntelliJ once all dependencies are installed.
+
 #### Commands
 `/dwarf nearestneighbor` - set the TSP algorithm to nearest neighbor  
 `/dwarf 2op` - set the TSP algorithm to 2-opt  
 `/dwarf greedyfloodfill` - set the pathfinding algorithm to Greedy Flood Fill (does not use TSP -- only paths to nearest ore)  
 `/dwarf evaluate <iterations>` - test the pathing lengths of the different algorithms the input number of times
 
-**NOTE:** The dwarf will use a custom 3-dimensional A* pathfinding algorithm regardless of the TSP algorithm that is selected
+**NOTE:** The dwarf will use a custom 3-dimensional A* pathfinding algorithm regardless of the TSP algorithm that is selected  
+
+#### Testing  
+To recreate the Evaluation scenario that we used in our report, create a new minecraft world (regular terrain generation). Then simply run `/dwarf evaluate 500`. The results will be printed to the game chat as well as saved to a csv file.
 
 #### Spawning
 The dwarf can be spawned from a spawn egg. In creative mode, the required item will appear in the 'Spawn Eggs' section of
