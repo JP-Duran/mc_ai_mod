@@ -2,7 +2,7 @@
 ### Professor: *Dr. Rodrigo Canaan*
 ### Students: *Julian Duran, Colby Watts, Katelyn Hallinan, Jackson Nelson, Grant Robinson*
 ### Credits: *Fabric Minecraft modding API, BlockBench*
-### *Based Code modified  github repo: https://github.com/Tutorials-By-Kaupenjoe/Fabric-Tutorial-1.21.X*
+#### [Reference github repo](https://github.com/Tutorials-By-Kaupenjoe/Fabric-Tutorial-1.21.X)
 
 ### Setup
 
@@ -25,7 +25,7 @@ Import the project into IntelliJ, let Gradle sync, and download any dependencies
 #### Commands
 `/dwarf nearestneighbor` - set the TSP algorithm to nearest neighbor  
 `/dwarf 2op` - set the TSP algorithm to 2-opt  
-`/dwarf greedyfloodfill` - set the pathfinding algorithm to Greedy Flood Fill (does not use TSP -- only paths to nearest ore)
+`/dwarf greedyfloodfill` - set the pathfinding algorithm to Greedy Flood Fill (does not use TSP -- only paths to nearest ore)  
 `/dwarf evaluate <iterations>` - test the pathing lengths of the different algorithms the input number of times
 
 **NOTE:** The dwarf will use a custom 3-dimensional A* pathfinding algorithm regardless of the TSP algorithm that is selected
